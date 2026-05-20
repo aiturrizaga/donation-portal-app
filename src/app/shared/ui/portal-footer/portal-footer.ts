@@ -8,5 +8,6 @@ import { Component, input } from '@angular/core';
 export class PortalFooter {
   readonly organizationName = input.required<string>();
   readonly organizationRuc = input.required<string>();
+  readonly primaryColor = input<string>('#10b981');
   readonly year = new Date().getFullYear();
 }

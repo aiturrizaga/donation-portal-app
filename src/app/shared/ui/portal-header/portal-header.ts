@@ -8,4 +8,5 @@ import { RouterLink } from '@angular/router';
 })
 export class PortalHeader {
   readonly organizationName = input.required<string>();
+  readonly logoUrl = input<string | null>(null);
 }
