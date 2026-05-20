@@ -3,19 +3,6 @@
   [style]="backgroundStyle()"
 >
 
-  <!-- Dynamic CSS vars from branding -->
-  @if (branding()) {
-    <style>
-      :root {
-        --brand-primary: {
-        {
-        primaryColor()
-        }
-        };
-      }
-    </style>
-  }
-
   <!-- Header -->
   @if (store.page()) {
     <app-portal-header

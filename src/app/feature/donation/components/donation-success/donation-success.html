@@ -40,6 +40,7 @@
   <div class="flex flex-col items-center gap-2 w-full">
     <button
       type="button"
+      (click)="viewCertificate()"
       class="w-full py-3 rounded-xl bg-emerald-500 text-white text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer"
     >
       <i class="ti ti-certificate text-base"></i>
@@ -48,6 +49,7 @@
 
     <button
       type="button"
+      (click)="share()"
       class="w-full py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm font-medium flex items-center justify-center gap-1.5 cursor-pointer"
     >
       <i class="ti ti-share text-base"></i>

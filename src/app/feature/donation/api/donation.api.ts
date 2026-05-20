@@ -91,4 +91,16 @@ export class DonationApi {
       .get<ApiResponse<UbigeoItem[]>>(`${this.#base}/ubigeo/districts?province=${province}`)
       .pipe(map((r) => r.data));
   }
+
+  // Abre en visor del navegador
+  getCertificateUrl(certificateNumber: string): string {
+    return `${this.#base}/certificates/${certificateNumber}/download`;
+  }
+
+  // Descarga directamente
+  downloadCertificate(certificateNumber: string): Observable<Blob> {
+    return this.#http.get(`${this.#base}/certificates/${certificateNumber}/download`, {
+      responseType: 'blob',
+    });
+  }
 }
