@@ -9,7 +9,6 @@ import { DonationError } from '../donation-error/donation-error';
 @Component({
   selector: 'app-donation-form',
   imports: [DonationStep1, DonationStep2, DonationStep3, DonationSuccess, DonationError],
-  providers: [DonationStore],
   templateUrl: './donation-form.html',
 })
 export class DonationForm implements OnInit {
