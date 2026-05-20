@@ -1,0 +1,67 @@
+<div class="flex flex-col items-center px-6 py-8 gap-5 text-center">
+
+  <!-- Check icon -->
+  <div class="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center">
+    <i class="ti ti-circle-check text-3xl text-emerald-500"></i>
+  </div>
+
+  <!-- Heading -->
+  <div class="flex flex-col gap-1">
+    <h2 class="text-xl font-bold text-gray-900">
+      {{ result()?.confirmHeading ?? '¡Gracias, ' + result()?.donorFirstName + '!' }}
+    </h2>
+    <p class="text-sm text-gray-500">
+      Tu donación de
+      <span class="font-semibold text-emerald-600">
+        {{ getCurrencySymbol(result()?.currency ?? 'PEN') }} {{ result()?.amount }}
+      </span>
+      está confirmada.
+    </p>
+    @if (result()?.confirmMessage) {
+      <p class="text-sm text-gray-500 mt-1">{{ result()!.confirmMessage }}</p>
+    }
+    <p class="text-xs text-emerald-500 mt-1">
+      Tu certificado llegará a
+      <span class="font-medium">{{ store().formState().email }}</span>
+    </p>
+  </div>
+
+  <!-- Quote -->
+  @if (result()?.confirmQuoteText) {
+    <div class="flex flex-col gap-1 px-4 py-3 bg-gray-50 rounded-xl w-full">
+      <p class="text-sm italic text-gray-600">"{{ result()!.confirmQuoteText }}"</p>
+      @if (result()?.confirmQuoteAuthor) {
+        <span class="text-xs text-gray-400">— {{ result()!.confirmQuoteAuthor }}</span>
+      }
+    </div>
+  }
+
+  <!-- Actions -->
+  <div class="flex flex-col items-center gap-2 w-full">
+    <button
+      type="button"
+      class="w-full py-3 rounded-xl bg-emerald-500 text-white text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer"
+    >
+      <i class="ti ti-certificate text-base"></i>
+      Ver mi certificado
+    </button>
+
+    <button
+      type="button"
+      class="w-full py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm font-medium flex items-center justify-center gap-1.5 cursor-pointer"
+    >
+      <i class="ti ti-share text-base"></i>
+      Compartir mi donación
+    </button>
+
+    <button
+      type="button"
+      class="text-xs text-gray-400 hover:text-gray-600 mt-1 transition-colors flex items-center gap-1 cursor-pointer"
+      (click)="donateAgain()"
+    >
+      <i class="ti ti-refresh text-xs"></i>
+      Hacer otra donación
+    </button>
+  </div>
+
+</div>

@@ -1,0 +1,194 @@
+<div class="flex flex-col px-6 py-4 gap-4">
+
+  <!-- Step label -->
+  <div>
+    <div class="text-xs font-semibold text-emerald-500 uppercase tracking-widest mb-0.5">
+      Paso 2 de 3
+    </div>
+    <h2 class="text-xl font-bold text-gray-900">Tus datos</h2>
+    <p class="text-sm text-gray-400 mt-0.5">Para tu certificado de donación y deducción tributaria.</p>
+  </div>
+
+  <form [formGroup]="form" class="flex flex-col gap-3">
+
+    <!-- Email -->
+    <div class="flex flex-col gap-1">
+      <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+        Correo electrónico
+      </label>
+      <input
+        type="email"
+        formControlName="email"
+        placeholder="tu@correo.com"
+        class="border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500 transition-colors"
+        [class.border-red-300]="form.controls.email.invalid && form.controls.email.touched"
+      />
+    </div>
+
+    <!-- Document type + number -->
+    <div class="flex flex-col gap-1">
+      <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+        Tipo y número de documento
+      </label>
+      <div class="flex gap-2">
+        <select
+          formControlName="documentType"
+          class="border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500 bg-white w-28"
+        >
+          @for (dt of documentTypes; track dt.value) {
+            <option [value]="dt.value">{{ dt.label }}</option>
+          }
+        </select>
+        <div class="flex-1 relative">
+          <input
+            type="text"
+            formControlName="documentNumber"
+            [placeholder]="form.controls.documentType.value === 'dni' ? '12345678' : form.controls.documentType.value === 'ruc' ? '20512345678' : 'Número'"
+            [maxlength]="form.controls.documentType.value === 'dni' ? 8 : form.controls.documentType.value === 'ruc' ? 11 : 20"
+            class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500"
+          />
+          @if (verifying()) {
+            <div class="absolute right-3 top-1/2 -translate-y-1/2">
+              <div class="w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Verification result -->
+      @if (verified()?.verified) {
+        <div class="flex items-start gap-2 mt-1 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+          <i class="ti ti-circle-check text-base text-emerald-500 mt-0.5 shrink-0"></i>
+          <div class="flex flex-col">
+            <span class="text-xs font-semibold text-emerald-700">Identidad verificada</span>
+            <span class="text-xs text-emerald-600">{{ verified()!.fullName }}</span>
+            @if (verified()!.address) {
+              <span class="text-xs text-emerald-500">{{ verified()!.address }}</span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Name fields — shown when not auto-filled or doc is CE/passport -->
+    @if (!verified()?.verified || form.controls.documentType.value === 'ce' || form.controls.documentType.value === 'passport') {
+      @if (isIndividual) {
+        <div class="grid grid-cols-2 gap-2">
+          <div class="flex flex-col gap-1">
+            <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Nombres</label>
+            <input
+              type="text"
+              formControlName="firstName"
+              placeholder="Juan"
+              class="border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500"
+            />
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Apellidos</label>
+            <input
+              type="text"
+              formControlName="lastName"
+              placeholder="Pérez García"
+              class="border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500"
+            />
+          </div>
+        </div>
+      } @else {
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Razón social</label>
+          <input
+            type="text"
+            formControlName="businessName"
+            placeholder="Empresa S.A.C."
+            class="border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500"
+          />
+        </div>
+      }
+    }
+
+    <!-- Address -->
+    <div class="flex flex-col gap-1">
+      <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+        Dirección
+        <span class="text-gray-400 font-normal normal-case ml-1">(opcional)</span>
+      </label>
+      <input
+        type="text"
+        formControlName="address"
+        placeholder="Av. Ejemplo 123, Lima"
+        class="border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500"
+      />
+    </div>
+
+    <!-- Ubigeo — Peru only -->
+    @if (form.controls.country.value === 'PE') {
+      <div class="flex flex-col gap-1">
+        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+          Ubigeo
+          <span class="text-gray-400 font-normal normal-case ml-1">(opcional)</span>
+        </label>
+        <div class="grid grid-cols-3 gap-2">
+          <select
+            formControlName="department"
+            class="border border-gray-200 rounded-lg px-2 py-2.5 text-xs focus:outline-none focus:border-emerald-500 bg-white"
+          >
+            <option value="">Departamento</option>
+            @for (dept of departments(); track dept.code) {
+              <option [value]="dept.code">{{ dept.name }}</option>
+            }
+          </select>
+          <select
+            formControlName="province"
+            class="border border-gray-200 rounded-lg px-2 py-2.5 text-xs focus:outline-none focus:border-emerald-500 bg-white"
+            [disabled]="!provinces().length"
+          >
+            <option value="">Provincia</option>
+            @for (prov of provinces(); track prov.code) {
+              <option [value]="prov.code">{{ prov.name }}</option>
+            }
+          </select>
+          <select
+            formControlName="district"
+            class="border border-gray-200 rounded-lg px-2 py-2.5 text-xs focus:outline-none focus:border-emerald-500 bg-white"
+            [disabled]="!districts().length"
+          >
+            <option value="">Distrito</option>
+            @for (dist of districts(); track dist.code) {
+              <option [value]="dist.code">{{ dist.name }}</option>
+            }
+          </select>
+        </div>
+      </div>
+    }
+
+  </form>
+
+  <!-- Footer -->
+  <div class="flex items-center justify-between pt-1 pb-2">
+    <!-- Atrás -->
+    <button
+      type="button"
+      class="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+      (click)="back()"
+    >
+      <i class="ti ti-arrow-left text-base"></i>
+      Atrás
+    </button>
+
+    <!-- Siguiente -->
+    <button
+      type="button"
+      class="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all cursor-pointer"
+      [class.bg-emerald-500]="canProceed()"
+      [class.text-white]="canProceed()"
+      [class.bg-gray-100]="!canProceed()"
+      [class.text-gray-400]="!canProceed()"
+      [disabled]="!canProceed()"
+      (click)="next()"
+    >
+      Siguiente
+      <i class="ti ti-arrow-right text-base"></i>
+    </button>
+  </div>
+
+</div>

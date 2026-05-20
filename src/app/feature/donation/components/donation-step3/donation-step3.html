@@ -1,0 +1,122 @@
+<div class="flex flex-col px-6 py-4 gap-4">
+
+  <!-- Step label -->
+  <div>
+    <div class="text-xs font-semibold text-emerald-500 uppercase tracking-widest mb-0.5">
+      Paso 3 de 3
+    </div>
+    <h2 class="text-xl font-bold text-gray-900">Confirma y dona</h2>
+    <p class="text-sm text-gray-400 mt-0.5">Revisa el resumen. Al hacer clic se abrirá el pago de forma segura.</p>
+  </div>
+
+  <!-- Summary -->
+  <div class="flex flex-col divide-y divide-gray-100 bg-gray-50 rounded-xl px-4">
+    <div class="flex justify-between py-2.5 text-sm">
+      <span class="text-gray-500">Grupo</span>
+      <span class="font-medium text-gray-900">{{ getTargetName() }}</span>
+    </div>
+    <div class="flex justify-between py-2.5 text-sm">
+      <span class="text-gray-500">Donante</span>
+      <span class="font-medium text-gray-900">
+        @if (state().firstName) {
+          {{ state().firstName }} {{ state().lastName }}
+        } @else {
+          {{ state().businessName }}
+        }
+      </span>
+    </div>
+    <div class="flex justify-between py-2.5 text-sm">
+      <span class="text-gray-500">Correo</span>
+      <span class="font-medium text-gray-700 truncate max-w-40">{{ state().email }}</span>
+    </div>
+    <div class="flex justify-between py-2.5 text-sm">
+      <span class="text-gray-500">Frecuencia</span>
+      <span class="font-medium text-gray-900">{{ getFrequencyLabel() }}</span>
+    </div>
+    <div class="flex justify-between py-2.5 text-sm">
+      <span class="text-gray-500">Total</span>
+      <span class="text-lg font-bold text-emerald-600">
+        {{ getCurrencySymbol(state().currency) }} {{ state().amount }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Impact message -->
+  @if (config()?.confirmMessage) {
+    <div class="flex items-center gap-2 text-xs text-emerald-600 bg-emerald-50 rounded-lg px-3 py-2">
+      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
+      {{ config()!.confirmMessage }}
+    </div>
+  }
+
+  <!-- Gateway -->
+  @if (getDefaultGateway(); as gw) {
+    <div class="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3">
+      <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center shrink-0">
+        <span class="text-xs font-bold text-gray-600 uppercase">{{ gw.provider[0] }}</span>
+      </div>
+      <div class="flex flex-col">
+        <span class="text-sm font-semibold text-gray-800">
+          Pago seguro vía {{ gw.provider | titlecase }}
+        </span>
+        <span class="text-xs text-gray-400">
+          {{ gw.testMode ? 'Modo sandbox' : 'SSL 256-bit · PCI DSS Level 1' }}
+        </span>
+      </div>
+    </div>
+  }
+
+  <!-- Privacy policy -->
+  <label class="flex items-start gap-2.5 cursor-pointer">
+    <input
+      type="checkbox"
+      [ngModel]="privacyAccepted()"
+      (ngModelChange)="togglePrivacy($event)"
+      class="mt-0.5 w-4 h-4 accent-emerald-500 shrink-0"
+    />
+    <span class="text-xs text-gray-500">
+      Acepto las
+      <a href="/privacidad" target="_blank" class="text-emerald-600 underline">políticas de privacidad</a>
+      y los
+      <a href="/terminos" target="_blank" class="text-emerald-600 underline">términos de uso.</a>
+    </span>
+  </label>
+
+  <!-- CTA -->
+  <button
+    type="button"
+    class="w-full py-3.5 rounded-xl text-base font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
+    [class.bg-emerald-500]="state().privacyPolicy"
+    [class.text-white]="state().privacyPolicy"
+    [class.bg-gray-100]="!state().privacyPolicy"
+    [class.text-gray-400]="!state().privacyPolicy"
+    [disabled]="!state().privacyPolicy || store().submitting()"
+    (click)="submit()"
+  >
+    @if (store().submitting()) {
+      <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+      Procesando...
+    } @else {
+      <i class="ti ti-lock text-base"></i>
+      Donar {{ getCurrencySymbol(state().currency) }} {{ state().amount }} de forma segura
+    }
+  </button>
+
+  <p class="text-center text-xs text-gray-400 flex items-center justify-center gap-1">
+    <i class="ti ti-lock text-xs"></i>
+    No almacenamos datos de tu tarjeta
+  </p>
+
+  <!-- Footer nav -->
+  <div class="flex items-center justify-between pb-2">
+    <span class="text-xs text-gray-400">3 / 3</span>
+    <button
+      type="button"
+      class="text-sm text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+      (click)="back()"
+    >
+      Atrás
+    </button>
+  </div>
+
+</div>
