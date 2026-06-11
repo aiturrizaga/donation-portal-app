@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://donation-manager-api.onrender.com/api',
+  apiUrl: 'https://api.adeu.org.pe/api',
 };
