@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { environment } from '@env/environment';
 
 @Component({
   selector: 'app-portal-system-layout',
@@ -8,4 +9,5 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 })
 export class PortalSystemLayout {
   readonly currentYear = new Date().getFullYear();
+  readonly supportUrl = environment.support.url;
 }
