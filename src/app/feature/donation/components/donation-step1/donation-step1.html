@@ -24,7 +24,7 @@
           [class.text-emerald-700]="state().targetId === null"
           [class.border-gray-200]="state().targetId !== null"
           [class.text-gray-500]="state().targetId !== null"
-          (click)="store().updateStep1({ targetId: null })"
+          (click)="store().updateForm({ targetId: null })"
         >
           Ninguno
         </button>

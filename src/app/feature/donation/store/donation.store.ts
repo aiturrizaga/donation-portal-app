@@ -1,7 +1,6 @@
-import { inject } from '@angular/core';
+import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { computed } from '@angular/core';
 import { catchError, EMPTY, pipe, switchMap, tap } from 'rxjs';
 import { DonationApi } from '../api/donation.api';
 import {
@@ -15,7 +14,6 @@ type DonationStep = 1 | 2 | 3 | 'success' | 'error';
 
 interface DonationState {
   page: DonationPage | null;
-  pageLoading: boolean;
   step: DonationStep;
   formState: DonationFormState;
   submitting: boolean;
@@ -26,7 +24,6 @@ interface DonationState {
 
 const initialState: DonationState = {
   page: null,
-  pageLoading: true,
   step: 1,
   formState: { ...INITIAL_FORM_STATE },
   submitting: false,
@@ -39,6 +36,7 @@ export const DonationStore = signalStore(
   withState(initialState),
 
   withComputed(({ direction, page, step, formState }) => ({
+    // Queries
     formConfig: computed(() => page()?.formConfig ?? null),
     branding: computed(() => page()?.branding ?? null),
     isStep1: computed(() => step() === 1),
@@ -50,10 +48,8 @@ export const DonationStore = signalStore(
       const s = step();
       if (s === 1) return '33%';
       if (s === 2) return '66%';
-      if (s === 3 || s === 'success' || s === 'error') return '100%';
-      return '0%';
+      return '100%';
     }),
-    // Derived label for frequency display
     frequencyLabel: computed(() => {
       const freq = formState().frequency;
       if (!freq || freq === 'one_time') return 'Única vez';
@@ -61,57 +57,31 @@ export const DonationStore = signalStore(
       if (freq === '12') return 'Anual';
       return `Cada ${freq} meses`;
     }),
-
     stepClass: computed(() => (direction() === 'forward' ? 'step-enter' : 'step-enter-back')),
   })),
 
   withMethods((store, api = inject(DonationApi)) => ({
-    loadPage: rxMethod<string>(
-      pipe(
-        tap(() => patchState(store, { pageLoading: true })),
-        switchMap((slug) =>
-          api.getPage(slug).pipe(
-            tap((page) => {
-              // Set defaults from form config
-              const fc = page.formConfig;
-              patchState(store, {
-                page,
-                pageLoading: false,
-                formState: {
-                  ...INITIAL_FORM_STATE,
-                  currency: fc?.currencyDefault ?? 'PEN',
-                  amount: fc?.amountDefault ?? null,
-                  donationType: 'one_time',
-                  frequency:
-                    fc?.frequencyDefault === 'one_time' ? null : (fc?.frequencyDefault ?? null),
-                  targetId: fc?.targets.find((t) => t.isDefault)?.id ?? null,
-                  gatewayId: fc?.gateways.find((g) => g.isDefault)?.id ?? null,
-                },
-              });
-            }),
-            catchError(() => {
-              patchState(store, { pageLoading: false });
-              return EMPTY;
-            }),
-          ),
-        ),
-      ),
-    ),
+    // Commands
 
-    updateStep1(partial: Partial<DonationFormState>): void {
+    // Receives the already-resolved page and seeds form defaults
+    init(page: DonationPage): void {
+      const fc = page.formConfig;
       patchState(store, {
-        formState: { ...store.formState(), ...partial },
+        page,
+        formState: {
+          ...INITIAL_FORM_STATE,
+          currency: fc?.currencyDefault ?? 'PEN',
+          amount: fc?.amountDefault ?? null,
+          donationType: 'one_time',
+          frequency: fc?.frequencyDefault === 'one_time' ? null : (fc?.frequencyDefault ?? null),
+          targetId: fc?.targets.find((t) => t.isDefault)?.id ?? null,
+          gatewayId: fc?.gateways.find((g) => g.isDefault)?.id ?? null,
+        },
       });
     },
 
-    updateStep2(partial: Partial<DonationFormState>): void {
-      patchState(store, {
-        formState: { ...store.formState(), ...partial },
-      });
-    },
-
-    goToStep(step: DonationStep): void {
-      patchState(store, { step });
+    updateForm(partial: Partial<DonationFormState>): void {
+      patchState(store, { formState: { ...store.formState(), ...partial } });
     },
 
     nextStep(): void {
@@ -134,19 +104,11 @@ export const DonationStore = signalStore(
           if (!page) return EMPTY;
           return api.submit(page.id, store.formState()).pipe(
             tap((result) =>
-              patchState(store, {
-                submitting: false,
-                submitResult: result,
-                step: 'success',
-              }),
+              patchState(store, { submitting: false, submitResult: result, step: 'success' }),
             ),
             catchError((err) => {
               const message = err?.error?.message ?? 'Ocurrió un error al procesar el pago.';
-              patchState(store, {
-                submitting: false,
-                submitError: message,
-                step: 'error',
-              });
+              patchState(store, { submitting: false, submitError: message, step: 'error' });
               return EMPTY;
             }),
           );
@@ -155,10 +117,7 @@ export const DonationStore = signalStore(
     ),
 
     retryPayment(): void {
-      patchState(store, {
-        step: 3,
-        submitError: null,
-      });
+      patchState(store, { step: 3, submitError: null });
     },
 
     resetForm(): void {

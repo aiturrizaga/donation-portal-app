@@ -1,9 +1,10 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, effect, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { DonationForm } from '../../components/donation-form/donation-form';
 import { DonationStore } from '../../store/donation.store';
+import { DonationPage } from '../../models/donation.model';
 import { PortalHeader } from '@shared/ui/portal-header/portal-header';
 import { PortalFooter } from '@shared/ui/portal-footer/portal-footer';
 
@@ -17,23 +18,23 @@ export class DonationLandingPage {
   readonly #route = inject(ActivatedRoute);
   readonly store = inject(DonationStore);
 
-  readonly slug = toSignal(this.#route.paramMap.pipe(map((p) => p.get('slug') ?? '')), {
-    initialValue: '',
+  // Page comes already resolved and validated by the resolver
+  readonly #page = toSignal(this.#route.data.pipe(map((d) => d['page'] as DonationPage)), {
+    initialValue: null,
   });
 
-  readonly branding = computed(() => this.store.page()?.branding ?? null);
+  constructor() {
+    effect(() => {
+      const page = this.#page();
+      if (page) this.store.init(page);
+    });
+  }
+
+  readonly branding = computed(() => this.store.branding());
   readonly primaryColor = computed(() => this.branding()?.primaryColor ?? '#10b981');
   readonly heroImageUrl = computed(() => this.branding()?.heroImageUrl ?? null);
   readonly logoUrl = computed(() => this.branding()?.logoUrl ?? null);
-  readonly orgName = computed(() => this.store.page()?.organizationName ?? '');
-
-  // readonly backgroundStyle = computed(() => {
-  //   const hero = this.heroImageUrl();
-  //   if (hero) {
-  //     return `background: linear-gradient(135deg, rgba(15,25,35,0.85) 0%, rgba(13,35,24,0.80) 100%), url('${hero}') center/cover no-repeat`;
-  //   }
-  //   return 'background: linear-gradient(135deg, #0f1923 0%, #1a2a3a 50%, #0d2318 100%)';
-  // });
+  readonly orgName = computed(() => this.branding()?.companyName ?? '');
 
   readonly backgroundStyle = computed(() => {
     const hero = this.heroImageUrl();
@@ -42,5 +43,4 @@ export class DonationLandingPage {
     }
     return 'background: linear-gradient(135deg, #0f1923 0%, #1a2a3a 50%, #0d2318 100%)';
   });
-
 }

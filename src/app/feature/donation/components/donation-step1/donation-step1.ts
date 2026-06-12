@@ -48,26 +48,26 @@ export class DonationStep1 {
   selectAmount(amount: number): void {
     this.showCustom.set(false);
     this.customAmount.set(null);
-    this.store().updateStep1({ amount, donationType: this.getDonationType() });
+    this.store().updateForm({ amount, donationType: this.getDonationType() });
   }
 
   selectCustom(): void {
     this.showCustom.set(true);
-    this.store().updateStep1({ amount: null });
+    this.store().updateForm({ amount: null });
   }
 
   onCustomAmountChange(value: number | null): void {
     this.customAmount.set(value);
-    this.store().updateStep1({ amount: value });
+    this.store().updateForm({ amount: value });
   }
 
   selectCurrency(currency: string): void {
-    this.store().updateStep1({ currency });
+    this.store().updateForm({ currency });
   }
 
   selectFrequency(value: string): void {
     const isRecurring = value !== 'one_time';
-    this.store().updateStep1({
+    this.store().updateForm({
       donationType: isRecurring ? 'recurring' : 'one_time',
       frequency: isRecurring ? value : null,
     });
@@ -77,7 +77,7 @@ export class DonationStep1 {
     const current = this.state().targetId;
     const target = this.config()?.targets.find((t) => t.id === id);
     if (target?.isLocked) return;
-    this.store().updateStep1({ targetId: current === id ? null : id });
+    this.store().updateForm({ targetId: current === id ? null : id });
   }
 
   private getDonationType(): 'one_time' | 'recurring' {

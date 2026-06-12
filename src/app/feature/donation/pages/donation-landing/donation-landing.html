@@ -53,9 +53,9 @@
     </div>
 
     <!-- Donation form -->
-    @if (slug()) {
+    @if (store.page()) {
       <div class="relative z-10">
-        <app-donation-form [slug]="slug()" />
+        <app-donation-form/>
       </div>
     }
 

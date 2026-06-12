@@ -1,8 +1,7 @@
-import { Component, computed, inject, input, OnInit, signal } from '@angular/core';
+import { Component, inject, input, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormsModule } from '@angular/forms';
 import { DonationStore } from '../../store/donation.store';
 import { DonationApi } from '../../api/donation.api';
 import { IdentityVerifyResponse, UbigeoItem } from '../../models/donation.model';
@@ -16,7 +15,7 @@ const DOCUMENT_TYPES = [
 
 @Component({
   selector: 'app-donation-step2',
-  imports: [ReactiveFormsModule, FormsModule],
+  imports: [ReactiveFormsModule],
   templateUrl: './donation-step2.html',
 })
 export class DonationStep2 implements OnInit {
@@ -197,7 +196,7 @@ export class DonationStep2 implements OnInit {
   next(): void {
     if (!this.canProceed()) return;
     const v = this.form.getRawValue();
-    this.store().updateStep2({
+    this.store().updateForm({
       documentType: v.documentType as any,
       documentNumber: v.documentNumber,
       firstName: v.firstName || null,

@@ -1,0 +1,31 @@
+<div class="min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="border-b border-zinc-100 px-5 py-3.5 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="w-7 h-7 rounded-md bg-zinc-800 flex items-center justify-center">
+        <i class="ti ti-heart-handshake text-white text-[15px]"></i>
+      </div>
+      <span class="text-sm font-medium text-zinc-800">Portal de Donaciones</span>
+    </div>
+
+    <a
+      href="mailto:donaciones@adeu.org.pe"
+      class="inline-flex items-center gap-1.5 text-sm text-zinc-500 transition-colors hover:text-zinc-800"
+    >
+      <i class="ti ti-help-circle text-base"></i>
+      <span>Ayuda</span>
+    </a>
+  </header>
+
+  <!-- Content -->
+  <main class="flex-1 flex items-center justify-center px-8 py-6">
+    <ng-content />
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-zinc-100 py-3.5 flex items-center justify-center gap-3.5">
+    <span class="text-xs text-zinc-400">© {{ currentYear }} Portal de Donaciones</span>
+  </footer>
+
+</div>

@@ -15,6 +15,6 @@ export class DonationError {
   }
 
   back(): void {
-    this.store().goToStep(3);
+    this.store().retryPayment();
   }
 }

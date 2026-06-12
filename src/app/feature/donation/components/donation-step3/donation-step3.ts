@@ -40,7 +40,7 @@ export class DonationStep3 {
   }
 
   togglePrivacy(value: boolean): void {
-    this.store().updateStep2({ privacyPolicy: value });
+    this.store().updateForm({ privacyPolicy: value });
   }
 
   submit(): void {

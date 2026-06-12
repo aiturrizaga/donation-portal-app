@@ -1,4 +1,4 @@
-import { Component, inject, input, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { DonationStore } from '../../store/donation.store';
 import { DonationStep1 } from '../donation-step1/donation-step1';
 import { DonationStep2 } from '../donation-step2/donation-step2';
@@ -11,11 +11,6 @@ import { DonationError } from '../donation-error/donation-error';
   imports: [DonationStep1, DonationStep2, DonationStep3, DonationSuccess, DonationError],
   templateUrl: './donation-form.html',
 })
-export class DonationForm implements OnInit {
-  readonly slug = input.required<string>();
+export class DonationForm {
   readonly store = inject(DonationStore);
-
-  ngOnInit(): void {
-    this.store.loadPage(this.slug());
-  }
 }

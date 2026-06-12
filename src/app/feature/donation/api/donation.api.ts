@@ -28,6 +28,12 @@ export class DonationApi {
       .pipe(map((r) => r.data));
   }
 
+  getDefaultPage(): Observable<DonationPage> {
+    return this.#http
+      .get<ApiResponse<DonationPage>>(`${this.#base}/default-page`)
+      .pipe(map((r) => r.data));
+  }
+
   verifyIdentity(documentType: string, documentNumber: string): Observable<IdentityVerifyResponse> {
     return this.#http
       .post<

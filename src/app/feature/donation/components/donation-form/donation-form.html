@@ -1,82 +1,55 @@
 <div class="bg-white rounded-2xl shadow-2xl w-96 flex flex-col overflow-hidden">
 
-  @if (store.pageLoading()) {
-    <!-- Skeleton loader -->
-    <div class="flex flex-col gap-4 p-6">
-      <div class="h-4 bg-gray-100 rounded animate-pulse w-1/2"></div>
-      <div class="h-3 bg-gray-100 rounded animate-pulse w-3/4"></div>
-      <div class="h-10 bg-gray-100 rounded animate-pulse"></div>
-      <div class="h-10 bg-gray-100 rounded animate-pulse"></div>
-    </div>
-  } @else {
-
-    <!-- Header -->
-    <div class="px-6 pt-5 pb-0">
-      <div class="flex items-center justify-between mb-1">
-        <span class="text-sm font-semibold text-gray-900">Formulario de donación</span>
-        @if (!store.isSuccess() && !store.showError()) {
-          <span class="text-xs text-gray-400">
-            {{ store.isStep1() ? 1 : store.isStep2() ? 2 : 3 }} / 3
-          </span>
-        }
-      </div>
-      <span class="text-xs text-gray-400">Seguro · Rápido · Con certificado</span>
-
-      <!-- Progress bar -->
+  <!-- Header -->
+  <div class="px-6 pt-5 pb-0">
+    <div class="flex items-center justify-between mb-1">
+      <span class="text-sm font-semibold text-gray-900">Formulario de donación</span>
       @if (!store.isSuccess() && !store.showError()) {
-        <div class="flex gap-1.5 mt-3">
-          <div class="h-0.5 flex-1 rounded-full overflow-hidden bg-gray-100">
-            <div
-              class="h-full bg-emerald-500 rounded-full transition-all duration-500"
-              [style.width]="store.isStep1() || store.isStep2() || store.isStep3() ? '100%' : '0%'"
-            ></div>
-          </div>
-          <div class="h-0.5 flex-1 rounded-full overflow-hidden bg-gray-100">
-            <div
-              class="h-full bg-emerald-500 rounded-full transition-all duration-500"
-              [style.width]="store.isStep2() || store.isStep3() ? '100%' : '0%'"
-            ></div>
-          </div>
-          <div class="h-0.5 flex-1 rounded-full overflow-hidden bg-gray-100">
-            <div
-              class="h-full bg-emerald-500 rounded-full transition-all duration-500"
-              [style.width]="store.isStep3() ? '100%' : '0%'"
-            ></div>
-          </div>
+        <span class="text-xs text-gray-400">
+          {{ store.isStep1() ? 1 : store.isStep2() ? 2 : 3 }} / 3
+        </span>
+      }
+    </div>
+    <span class="text-xs text-gray-400">Seguro · Rápido · Con certificado</span>
+
+    <!-- Progress bar -->
+    @if (!store.isSuccess() && !store.showError()) {
+      <div class="flex gap-1.5 mt-3">
+        <div class="h-0.5 flex-1 rounded-full overflow-hidden bg-gray-100">
+          <div
+            class="h-full bg-emerald-500 rounded-full transition-all duration-500"
+            [style.width]="store.isStep1() || store.isStep2() || store.isStep3() ? '100%' : '0%'"
+          ></div>
         </div>
-      }
-    </div>
+        <div class="h-0.5 flex-1 rounded-full overflow-hidden bg-gray-100">
+          <div
+            class="h-full bg-emerald-500 rounded-full transition-all duration-500"
+            [style.width]="store.isStep2() || store.isStep3() ? '100%' : '0%'"
+          ></div>
+        </div>
+        <div class="h-0.5 flex-1 rounded-full overflow-hidden bg-gray-100">
+          <div
+            class="h-full bg-emerald-500 rounded-full transition-all duration-500"
+            [style.width]="store.isStep3() ? '100%' : '0%'"
+          ></div>
+        </div>
+      </div>
+    }
+  </div>
 
-    <!-- Steps -->
-    <div class="flex-1 overflow-y-auto">
-      @if (store.isStep1()) {
-        <app-donation-step1
-          [store]="store"
-          [class]="store.stepClass()"
-        />
-      } @else if (store.isStep2()) {
-        <app-donation-step2
-          [store]="store"
-          [class]="store.stepClass()"
-        />
-      } @else if (store.isStep3()) {
-        <app-donation-step3
-          [store]="store"
-          [class]="store.stepClass()"
-        />
-      } @else if (store.isSuccess()) {
-        <app-donation-success
-          [store]="store"
-          class="step-enter"
-        />
-      } @else if (store.showError()) {
-        <app-donation-error
-          [store]="store"
-          class="step-enter"
-        />
-      }
-    </div>
-
-  }
+  <!-- Steps -->
+  <div class="flex-1 overflow-y-auto">
+    @if (store.isStep1()) {
+      <app-donation-step1 [store]="store" [class]="store.stepClass()" />
+    } @else if (store.isStep2()) {
+      <app-donation-step2 [store]="store" [class]="store.stepClass()" />
+    } @else if (store.isStep3()) {
+      <app-donation-step3 [store]="store" [class]="store.stepClass()" />
+    } @else if (store.isSuccess()) {
+      <app-donation-success [store]="store" class="step-enter" />
+    } @else if (store.showError()) {
+      <app-donation-error [store]="store" class="step-enter" />
+    }
+  </div>
 
 </div>
