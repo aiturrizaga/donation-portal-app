@@ -34,7 +34,7 @@ export class DonationLandingPage {
   readonly primaryColor = computed(() => this.branding()?.primaryColor ?? '#10b981');
   readonly heroImageUrl = computed(() => this.branding()?.heroImageUrl ?? null);
   readonly logoUrl = computed(() => this.branding()?.logoUrl ?? null);
-  readonly orgName = computed(() => this.branding()?.companyName ?? '');
+  readonly orgName = computed(() => this.store.page()?.organizationName ?? '');
 
   readonly backgroundStyle = computed(() => {
     const hero = this.heroImageUrl();

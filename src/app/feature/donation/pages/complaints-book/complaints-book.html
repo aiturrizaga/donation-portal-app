@@ -1,0 +1,250 @@
+<app-portal-system-layout>
+  <div class="w-full max-w-xl mx-auto">
+
+    <!-- Título -->
+    <div class="flex items-center gap-2.5 mb-1">
+      <i class="ti ti-book text-2xl text-zinc-800"></i>
+      <h1 class="text-lg font-medium text-zinc-800">Libro de reclamaciones</h1>
+    </div>
+    <p class="text-sm text-zinc-500 mb-4">
+      Conforme al Código de Protección y Defensa del Consumidor (Ley 29571).
+    </p>
+
+    <!-- Cabecera: hoja, fecha, proveedor -->
+    <div class="flex gap-3 p-3 bg-zinc-100 rounded-lg mb-5">
+      <div class="flex-1">
+        <div class="text-[11px] text-zinc-400 mb-0.5">Hoja N°</div>
+        <div class="text-sm font-medium text-zinc-800">000001</div>
+      </div>
+      <div class="flex-1">
+        <div class="text-[11px] text-zinc-400 mb-0.5">Fecha</div>
+        <div class="text-sm font-medium text-zinc-800">{{ today | date: 'dd/MM/yyyy' }}</div>
+      </div>
+      <div class="flex-2">
+        <div class="text-[11px] text-zinc-400 mb-0.5">Proveedor</div>
+        <div class="text-sm font-medium text-zinc-800">ADEU</div>
+      </div>
+    </div>
+
+    <form [formGroup]="form" class="flex flex-col">
+
+      <!-- 1. Datos del consumidor -->
+      <div class="text-xs font-medium tracking-wide text-emerald-600 uppercase mb-2.5">
+        1. Tus datos
+      </div>
+
+      <div class="flex flex-col gap-2.5">
+        <div class="flex flex-col gap-1">
+          <label class="text-xs text-zinc-600">Nombre completo</label>
+          <input
+            type="text"
+            formControlName="fullName"
+            placeholder="Juan Pérez García"
+            class="border border-zinc-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500"
+          />
+        </div>
+
+        <div class="flex gap-2.5">
+          <div class="flex flex-col gap-1 w-28">
+            <label class="text-xs text-zinc-600">Tipo doc.</label>
+            <select
+              formControlName="documentType"
+              class="border border-zinc-200 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:border-emerald-500"
+            >
+              @for (dt of documentTypes; track dt.value) {
+                <option [value]="dt.value">{{ dt.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="flex flex-col gap-1 flex-1">
+            <label class="text-xs text-zinc-600">N° documento</label>
+            <input
+              type="text"
+              formControlName="documentNumber"
+              placeholder="12345678"
+              class="border border-zinc-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500"
+            />
+          </div>
+        </div>
+
+        <div class="flex gap-2.5">
+          <div class="flex flex-col gap-1 flex-1">
+            <label class="text-xs text-zinc-600">Correo</label>
+            <input
+              type="email"
+              formControlName="email"
+              placeholder="juan@correo.com"
+              class="border border-zinc-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500"
+            />
+          </div>
+          <div class="flex flex-col gap-1 flex-1">
+            <label class="text-xs text-zinc-600">Teléfono</label>
+            <input
+              type="tel"
+              formControlName="phone"
+              placeholder="999 999 999"
+              class="border border-zinc-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500"
+            />
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="text-xs text-zinc-600">Domicilio</label>
+          <input
+            type="text"
+            formControlName="address"
+            placeholder="Av. Ejemplo 123, Lima"
+            class="border border-zinc-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500"
+          />
+        </div>
+
+        <!-- Menor de edad -->
+        <label class="flex items-center gap-2 cursor-pointer mt-0.5">
+          <input type="checkbox" formControlName="isMinor" class="w-4 h-4 accent-emerald-500" />
+          <span class="text-xs text-zinc-600">El consumidor es menor de edad</span>
+        </label>
+
+        @if (showGuardian()) {
+          <div class="flex flex-col gap-1">
+            <label class="text-xs text-zinc-600">Nombre del padre, madre o apoderado</label>
+            <input
+              type="text"
+              formControlName="guardianName"
+              placeholder="Nombre del apoderado"
+              class="border border-zinc-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500"
+            />
+          </div>
+        }
+      </div>
+
+      <!-- 2. Detalle -->
+      <div class="text-xs font-medium tracking-wide text-emerald-600 uppercase mt-5 mb-2.5">
+        2. Detalle
+      </div>
+
+      <!-- Reclamo vs Queja -->
+      <div class="flex gap-2 mb-3">
+        <button
+          type="button"
+          (click)="selectRecordType('reclamo')"
+          class="flex-1 rounded-lg p-2.5 text-left transition-all cursor-pointer border"
+          [class.border-emerald-500]="isReclamo()"
+          [class.bg-emerald-50]="isReclamo()"
+          [class.border-zinc-200]="!isReclamo()"
+        >
+          <div class="flex items-center gap-1.5 mb-0.5">
+            <i
+              class="ti text-base"
+              [class.ti-circle-check]="isReclamo()"
+              [class.text-emerald-700]="isReclamo()"
+              [class.ti-circle]="!isReclamo()"
+              [class.text-zinc-400]="!isReclamo()"
+            ></i>
+            <span class="text-sm font-medium" [class.text-emerald-700]="isReclamo()"
+                  [class.text-zinc-600]="!isReclamo()">
+              Reclamo
+            </span>
+          </div>
+          <span class="text-[11px]" [class.text-emerald-600]="isReclamo()" [class.text-zinc-400]="!isReclamo()">
+            Disconformidad con el servicio
+          </span>
+        </button>
+
+        <button
+          type="button"
+          (click)="selectRecordType('queja')"
+          class="flex-1 rounded-lg p-2.5 text-left transition-all cursor-pointer border"
+          [class.border-emerald-500]="!isReclamo()"
+          [class.bg-emerald-50]="!isReclamo()"
+          [class.border-zinc-200]="isReclamo()"
+        >
+          <div class="flex items-center gap-1.5 mb-0.5">
+            <i
+              class="ti text-base"
+              [class.ti-circle-check]="!isReclamo()"
+              [class.text-emerald-700]="!isReclamo()"
+              [class.ti-circle]="isReclamo()"
+              [class.text-zinc-400]="isReclamo()"
+            ></i>
+            <span class="text-sm font-medium" [class.text-emerald-700]="!isReclamo()"
+                  [class.text-zinc-600]="isReclamo()">
+              Queja
+            </span>
+          </div>
+          <span class="text-[11px]" [class.text-emerald-600]="!isReclamo()" [class.text-zinc-400]="isReclamo()">
+            Malestar con la atención
+          </span>
+        </button>
+      </div>
+
+      <div class="flex gap-2.5 mb-2.5">
+        <div class="flex flex-col gap-1 w-36">
+          <label class="text-xs text-zinc-600">Tipo</label>
+          <select
+            formControlName="goodType"
+            class="border border-zinc-200 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:border-emerald-500"
+          >
+            <option value="servicio">Servicio</option>
+            <option value="producto">Producto</option>
+          </select>
+        </div>
+        <div class="flex flex-col gap-1 flex-1">
+          <label class="text-xs text-zinc-600">Monto (opcional)</label>
+          <input
+            type="number"
+            formControlName="amount"
+            placeholder="S/ 0.00"
+            class="border border-zinc-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500"
+          />
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1 mb-2.5">
+        <label class="text-xs text-zinc-600">Detalle del reclamo</label>
+        <textarea
+          formControlName="detail"
+          rows="3"
+          placeholder="Describe lo sucedido…"
+          class="border border-zinc-200 rounded-lg px-3 py-2.5 text-sm resize-y focus:outline-none focus:border-emerald-500"
+        ></textarea>
+      </div>
+
+      <div class="flex flex-col gap-1 mb-3.5">
+        <label class="text-xs text-zinc-600">Tu pedido</label>
+        <textarea
+          formControlName="request"
+          rows="2"
+          placeholder="¿Qué solución esperas?"
+          class="border border-zinc-200 rounded-lg px-3 py-2.5 text-sm resize-y focus:outline-none focus:border-emerald-500"
+        ></textarea>
+      </div>
+
+      <!-- Consentimiento -->
+      <label class="flex items-start gap-2 mb-3.5 cursor-pointer">
+        <input type="checkbox" formControlName="dataConsent" class="mt-0.5 w-4 h-4 accent-emerald-500 shrink-0" />
+        <span class="text-[11px] text-zinc-500 leading-relaxed">
+          He leído y acepto el tratamiento de mis datos personales para la atención de este reclamo
+          (Ley 29733).
+        </span>
+      </label>
+
+      <!-- Aviso de plazo -->
+      <div class="flex gap-2 p-3 bg-amber-100 rounded-lg mb-4">
+        <i class="ti ti-info-circle text-base text-amber-800 shrink-0 mt-0.5"></i>
+        <span class="text-[11px] text-amber-800 leading-relaxed">
+          El proveedor responderá en un plazo máximo de 15 días hábiles, conforme a ley.
+        </span>
+      </div>
+
+      <button
+        type="button"
+        (click)="submit()"
+        class="w-full bg-zinc-800 text-white text-sm font-medium py-3 rounded-lg flex items-center justify-center gap-2 transition-colors hover:bg-zinc-900 cursor-pointer"
+      >
+        <i class="ti ti-send text-base"></i>
+        Enviar reclamación
+      </button>
+
+    </form>
+  </div>
+</app-portal-system-layout>

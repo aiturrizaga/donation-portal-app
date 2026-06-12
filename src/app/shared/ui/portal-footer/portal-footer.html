@@ -4,20 +4,42 @@
   <div class="flex flex-wrap items-center gap-6 px-6 py-4 border-t border-white/10">
     <span class="flex items-center gap-2 text-xs text-white/60">
       <i class="ti ti-shield-check text-sm" [style.color]="primaryColor()"></i>
-      Organización verificada y legítima
+      Organización verificada
     </span>
     <span class="flex items-center gap-2 text-xs text-white/60">
       <i class="ti ti-lock text-sm" [style.color]="primaryColor()"></i>
-      Tus datos están seguros
+      Datos seguros
     </span>
     <span class="flex items-center gap-2 text-xs text-white/60">
       <i class="ti ti-file-certificate text-sm" [style.color]="primaryColor()"></i>
-      Válido para deducción tributaria
+      Deducción tributaria
     </span>
   </div>
 
+  <!-- Datos de contacto del proveedor -->
+  <div class="flex flex-wrap gap-y-2 gap-x-6 px-6 py-4 border-t border-white/10">
+    <span class="flex items-center gap-2 text-xs text-white/55">
+      <i class="ti ti-map-pin text-sm text-white/35"></i>
+      {{ organizationAddress() }}
+    </span>
+    <a
+      [href]="'mailto:' + organizationEmail()"
+      class="flex items-center gap-2 text-xs text-white/55 hover:text-white/80 transition-colors"
+    >
+      <i class="ti ti-mail text-sm text-white/35"></i>
+      {{ organizationEmail() }}
+    </a>
+    <a
+      [href]="'tel:' + organizationPhone()"
+      class="flex items-center gap-2 text-xs text-white/55 hover:text-white/80 transition-colors"
+    >
+      <i class="ti ti-phone text-sm text-white/35"></i>
+      {{ organizationPhone() }}
+    </a>
+  </div>
+
   <!-- Legal -->
-  <div class="flex items-center justify-between px-6 py-3 border-t border-white/10">
+  <div class="flex items-center justify-between flex-wrap gap-2.5 px-6 py-3 border-t border-white/10">
     <span class="text-xs text-white/40">
       © {{ year }} {{ organizationName() }} · RUC {{ organizationRuc() }}
     </span>
@@ -28,8 +50,8 @@
       <a href="/terminos" class="text-xs text-white/40 hover:text-white/70 transition-colors">
         Términos
       </a>
-      <a href="/contacto" class="text-xs text-white/40 hover:text-white/70 transition-colors">
-        Contacto
+      <a routerLink="/libro-reclamaciones" class="text-xs text-white/40 hover:text-white/70 transition-colors">
+        Libro de reclamaciones
       </a>
     </div>
   </div>

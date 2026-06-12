@@ -11,6 +11,11 @@ export const routes: Routes = [
       import('./pages/donation-landing/donation-landing').then((m) => m.DonationLandingPage),
   },
   {
+    path: 'libro-reclamaciones',
+    loadComponent: () =>
+      import('./pages/complaints-book/complaints-book').then((m) => m.ComplaintsBookPage),
+  },
+  {
     path: ':slug',
     resolve: { page: donationPageResolver },
     loadComponent: () =>
