@@ -1,43 +1,43 @@
-import { Component, inject, input, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DonationStore } from '../../store/donation.store';
-import { DonationApi } from '../../api/donation.api';
-import { IdentityVerifyResponse, UbigeoItem } from '../../models/donation.model';
-
-const DOCUMENT_TYPES = [
-  { label: 'DNI', value: 'dni' },
-  { label: 'RUC', value: 'ruc' },
-  { label: 'CE', value: 'ce' },
-  { label: 'Pasaporte', value: 'passport' },
-];
+import { DOCUMENT_TYPES } from '../../models/donation.model';
+import { IdentityVerificationFacade } from '../../facade/identity-verification.facade';
+import { Spinner } from '@shared/ui/spinner/spinner';
+import { InlineError } from '@shared/ui/inline-error/inline-error';
+import { getFieldError } from '@shared/utils/form-validation.util';
+import { TextField } from '@shared/ui/text-field/text-field';
 
 @Component({
   selector: 'app-donation-step2',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, Spinner, InlineError, TextField],
   templateUrl: './donation-step2.html',
+  providers: [IdentityVerificationFacade],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DonationStep2 implements OnInit {
-  readonly store = input.required<InstanceType<typeof DonationStore>>();
-  readonly #api = inject(DonationApi);
+  readonly store = inject(DonationStore);
+  readonly identity = inject(IdentityVerificationFacade);
   readonly #fb = inject(FormBuilder);
 
   readonly documentTypes = DOCUMENT_TYPES;
-  readonly verifying = signal(false);
-  readonly verified = signal<IdentityVerifyResponse | null>(null);
-  readonly verifyError = signal(false);
-
-  readonly departments = signal<UbigeoItem[]>([]);
-  readonly provinces = signal<UbigeoItem[]>([]);
-  readonly districts = signal<UbigeoItem[]>([]);
-  readonly loadingProvinces = signal(false);
-  readonly loadingDistricts = signal(false);
+  protected readonly getFieldError = getFieldError;
 
   get isIndividual(): boolean {
     const dt = this.form.controls.documentType.value;
     return dt === 'dni' || dt === 'ce' || dt === 'passport';
   }
+
+  // Only recurring donations ever reach Culqi's POST /customers (a
+  // one-time card charge never sends the address at all) — and Culqi
+  // rejects that call outright if address is missing or too short
+  // (confirmed live 2026-07-28: "El campo 'address' es inválido o está
+  // vacío. El valor debe ser de menos de 100 caracteres, y más de 5.").
+  // Required + validated here so the donor finds out before submitting,
+  // instead of the backend having to silently substitute a fallback.
+  readonly isRecurring = computed(() => this.store.formState().donationType === 'recurring');
 
   readonly form = this.#fb.group({
     documentType: this.#fb.control('dni', { nonNullable: true }),
@@ -61,15 +61,63 @@ export class DonationStep2 implements OnInit {
   });
 
   constructor() {
+    // Reactive forms directives warn if [disabled] is set via template
+    // binding on a formControlName element — the DOM and the control's own
+    // disabled state can drift apart that way. Driving it from the control
+    // itself instead. emitEvent:false so this doesn't re-trigger the
+    // valueChanges subscriptions below (which already own reset/reload).
+    effect(() => {
+      const hasProvinces = this.identity.provinces().length > 0;
+      if (hasProvinces) this.form.controls.province.enable({ emitEvent: false });
+      else this.form.controls.province.disable({ emitEvent: false });
+    });
+    effect(() => {
+      const hasDistricts = this.identity.districts().length > 0;
+      if (hasDistricts) this.form.controls.district.enable({ emitEvent: false });
+      else this.form.controls.district.disable({ emitEvent: false });
+    });
+
+    // See isRecurring's comment above for why this is conditional rather
+    // than always-required — a one-time donation never sends address to
+    // Culqi at all, so forcing it there would be friction with no payoff.
+    effect(() => {
+      const control = this.form.controls.address;
+      if (this.isRecurring()) {
+        control.setValidators([Validators.required, Validators.minLength(6)]);
+      } else {
+        control.clearValidators();
+      }
+      control.updateValueAndValidity({ emitEvent: false });
+    });
+
+    // Autofill the form as soon as the identity facade resolves a verified match
+    effect(() => {
+      const result = this.identity.verified();
+      if (!result?.verified) return;
+
+      if (result.firstName) this.form.controls.firstName.setValue(result.firstName);
+      if (result.lastName) this.form.controls.lastName.setValue(result.lastName);
+      if (result.businessName) this.form.controls.businessName.setValue(result.businessName);
+      if (result.address) this.form.controls.address.setValue(result.address);
+      if (result.ubigeoDepart) this.form.controls.department.setValue(result.ubigeoDepart);
+      if (result.ubigeoProv) this.form.controls.province.setValue(result.ubigeoProv);
+      if (result.ubigeoDist) this.form.controls.district.setValue(result.ubigeoDist);
+    });
+
     // Auto-verify DNI/RUC after typing
     this.form.controls.documentNumber.valueChanges
       .pipe(debounceTime(600), distinctUntilChanged(), takeUntilDestroyed())
-      .subscribe(() => this._tryVerify());
+      .subscribe(() =>
+        this.identity.verify(
+          this.form.controls.documentType.value,
+          this.form.controls.documentNumber.value.trim(),
+        ),
+      );
 
     // Reset verification when doc type changes
     this.form.controls.documentType.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
-      this.verified.set(null);
-      this.verifyError.set(false);
+      this.identity.resetVerification();
+      this.identity.resetProvinces();
       this.form.controls.documentNumber.reset('');
       this.form.controls.firstName.reset('');
       this.form.controls.lastName.reset('');
@@ -78,32 +126,29 @@ export class DonationStep2 implements OnInit {
       this.form.controls.department.reset('');
       this.form.controls.province.reset('');
       this.form.controls.district.reset('');
-      this.provinces.set([]);
-      this.districts.set([]);
     });
 
     // Load provinces when department changes
     this.form.controls.department.valueChanges.pipe(takeUntilDestroyed()).subscribe((dept) => {
       this.form.controls.province.reset('');
       this.form.controls.district.reset('');
-      this.provinces.set([]);
-      this.districts.set([]);
+      this.identity.resetProvinces();
       if (dept && this.form.controls.country.value === 'PE') {
-        this._loadProvinces(dept);
+        this.identity.loadProvinces(dept);
       }
     });
 
     // Load districts when province changes
     this.form.controls.province.valueChanges.pipe(takeUntilDestroyed()).subscribe((prov) => {
       this.form.controls.district.reset('');
-      this.districts.set([]);
-      if (prov) this._loadDistricts(prov);
+      this.identity.resetDistricts();
+      if (prov) this.identity.loadDistricts(prov);
     });
   }
 
   ngOnInit(): void {
     // Patch from store state
-    const s = this.store().formState();
+    const s = this.store.formState();
     this.form.patchValue({
       documentType: s.documentType,
       documentNumber: s.documentNumber,
@@ -118,71 +163,7 @@ export class DonationStep2 implements OnInit {
       province: s.province ?? '',
       district: s.district ?? '',
     });
-    this._loadDepartments();
-  }
-
-  private _tryVerify(): void {
-    const docType = this.form.controls.documentType.value;
-    const docNumber = this.form.controls.documentNumber.value.trim();
-
-    if (docType === 'ce' || docType === 'passport') return;
-
-    const minLen = docType === 'dni' ? 8 : 11;
-    if (docNumber.length < minLen) return;
-
-    this.verifying.set(true);
-    this.verified.set(null);
-    this.verifyError.set(false);
-
-    this.#api.verifyIdentity(docType, docNumber).subscribe({
-      next: (result) => {
-        this.verifying.set(false);
-        this.verified.set(result);
-
-        if (result.verified) {
-          if (result.firstName) this.form.controls.firstName.setValue(result.firstName);
-          if (result.lastName) this.form.controls.lastName.setValue(result.lastName);
-          if (result.businessName) this.form.controls.businessName.setValue(result.businessName);
-          if (result.address) this.form.controls.address.setValue(result.address);
-          if (result.ubigeoDepart) this.form.controls.department.setValue(result.ubigeoDepart);
-          if (result.ubigeoProv) this.form.controls.province.setValue(result.ubigeoProv);
-          if (result.ubigeoDist) this.form.controls.district.setValue(result.ubigeoDist);
-        }
-      },
-      error: () => {
-        this.verifying.set(false);
-        this.verifyError.set(true);
-      },
-    });
-  }
-
-  private _loadDepartments(): void {
-    this.#api.getDepartments().subscribe((data) => this.departments.set(data));
-  }
-
-  private _loadProvinces(dept: string): void {
-    this.loadingProvinces.set(true);
-    this.#api
-      .getProvinces(dept)
-      .pipe()
-      .subscribe({
-        next: (data) => {
-          this.provinces.set(data);
-          this.loadingProvinces.set(false);
-        },
-        error: () => this.loadingProvinces.set(false),
-      });
-  }
-
-  private _loadDistricts(prov: string): void {
-    this.loadingDistricts.set(true);
-    this.#api.getDistricts(prov).subscribe({
-      next: (data) => {
-        this.districts.set(data);
-        this.loadingDistricts.set(false);
-      },
-      error: () => this.loadingDistricts.set(false),
-    });
+    this.identity.loadDepartments();
   }
 
   canProceed(): boolean {
@@ -190,13 +171,14 @@ export class DonationStep2 implements OnInit {
     const hasName = this.isIndividual
       ? !!(v.firstName?.trim() && v.lastName?.trim())
       : !!v.businessName?.trim();
-    return !!(v.email?.trim() && v.documentNumber?.trim() && hasName);
+    const addressOk = !this.isRecurring() || (v.address?.trim().length ?? 0) >= 6;
+    return !!(v.email?.trim() && v.documentNumber?.trim() && hasName) && addressOk;
   }
 
   next(): void {
     if (!this.canProceed()) return;
     const v = this.form.getRawValue();
-    this.store().updateForm({
+    this.store.updateForm({
       documentType: v.documentType as any,
       documentNumber: v.documentNumber,
       firstName: v.firstName || null,
@@ -210,10 +192,17 @@ export class DonationStep2 implements OnInit {
       province: v.province || null,
       district: v.district || null,
     });
-    this.store().nextStep();
+    this.store.nextStep();
   }
 
   back(): void {
-    this.store().prevStep();
+    this.store.prevStep();
+  }
+
+  retryVerification(): void {
+    this.identity.verify(
+      this.form.controls.documentType.value,
+      this.form.controls.documentNumber.value.trim(),
+    );
   }
 }

@@ -40,16 +40,34 @@
   <!-- Steps -->
   <div class="flex-1 overflow-y-auto">
     @if (store.isStep1()) {
-      <app-donation-step1 [store]="store" [class]="store.stepClass()" />
+      <app-donation-step1 [class]="store.stepClass()" />
     } @else if (store.isStep2()) {
-      <app-donation-step2 [store]="store" [class]="store.stepClass()" />
+      <app-donation-step2 [class]="store.stepClass()" />
     } @else if (store.isStep3()) {
-      <app-donation-step3 [store]="store" [class]="store.stepClass()" />
+      <app-donation-step3 [class]="store.stepClass()" />
     } @else if (store.isSuccess()) {
-      <app-donation-success [store]="store" class="step-enter" />
+      <app-donation-success class="step-enter" />
     } @else if (store.showError()) {
-      <app-donation-error [store]="store" class="step-enter" />
+      <app-donation-error class="step-enter" />
     }
   </div>
 
 </div>
+
+<!-- Full-screen processing lock — the donation is being confirmed with our
+     backend after Culqi already returned a token. Deliberately blocks all
+     interaction: leaving this window mid-flight risks the donor thinking
+     nothing happened and retrying, when the charge may already be going
+     through. See PAYMENTS_ARCHITECTURE.md §21 (added after live
+     verification showed only a small in-button spinner here, easy to miss). -->
+@if (store.submitting()) {
+  <div
+    class="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-gray-900/80 backdrop-blur-sm px-6 text-center"
+  >
+    <app-spinner variant="white" class="scale-[2.5]" />
+    <div class="flex flex-col gap-1">
+      <span class="text-white font-semibold">Procesando tu donación…</span>
+      <span class="text-white/70 text-sm">No cierres ni recargues esta ventana.</span>
+    </div>
+  </div>
+}

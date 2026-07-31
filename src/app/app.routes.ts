@@ -10,10 +10,6 @@ export const routes: Routes = [
     loadComponent: () => import('./core/pages/not-configured').then((m) => m.NotConfiguredPage),
   },
   {
-    path: 'account',
-    loadChildren: () => import('./feature/account/account.routes').then((m) => m.routes),
-  },
-  {
     path: '',
     loadChildren: () => import('./feature/donation/donation.routes').then((m) => m.routes),
   },

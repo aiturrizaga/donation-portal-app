@@ -1,20 +1,23 @@
-import { Component, input, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DonationStore } from '../../store/donation.store';
+import { getCurrencySymbol } from '@shared/utils/currency.util';
 
 @Component({
   selector: 'app-donation-step1',
   imports: [FormsModule],
   templateUrl: './donation-step1.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DonationStep1 {
-  readonly store = input.required<InstanceType<typeof DonationStore>>();
+  readonly store = inject(DonationStore);
+  protected readonly getCurrencySymbol = getCurrencySymbol;
 
   readonly customAmount = signal<number | null>(null);
   readonly showCustom = signal(false);
 
-  readonly config = computed(() => this.store().formConfig());
-  readonly state = computed(() => this.store().formState());
+  readonly config = computed(() => this.store.formConfig());
+  readonly state = computed(() => this.store.formState());
 
   readonly visibleTargets = computed(() => this.config()?.targets.filter((t) => t.isVisible) ?? []);
 
@@ -24,15 +27,15 @@ export class DonationStep1 {
     this.state().donationType === 'one_time' ? 'one_time' : this.state().frequency,
   );
 
-  getCurrencySymbol(currency: string): string {
-    return currency === 'PEN' ? 'S/' : currency === 'USD' ? 'US$' : currency;
-  }
-
   getFrequencyLabel(value: string): string {
     if (value === 'one_time') return 'Única vez';
     if (value === '1') return 'Mensual';
     if (value === '12') return 'Anual';
-    return `${value} meses`;
+    // Fixed-term pledge: charged monthly for exactly `value` months, then
+    // stops automatically (see ChargeDonationUseCase.frequency_to_plan,
+    // backend). "Por N meses" reads unambiguously as a duration — the
+    // previous "N meses" label was easy to misread as "every N months".
+    return `Por ${value} meses`;
   }
 
   getImpactMessage(amount: number | null, frequency: string | null): string | null {
@@ -48,26 +51,26 @@ export class DonationStep1 {
   selectAmount(amount: number): void {
     this.showCustom.set(false);
     this.customAmount.set(null);
-    this.store().updateForm({ amount, donationType: this.getDonationType() });
+    this.store.updateForm({ amount, donationType: this.getDonationType() });
   }
 
   selectCustom(): void {
     this.showCustom.set(true);
-    this.store().updateForm({ amount: null });
+    this.store.updateForm({ amount: null });
   }
 
   onCustomAmountChange(value: number | null): void {
     this.customAmount.set(value);
-    this.store().updateForm({ amount: value });
+    this.store.updateForm({ amount: value });
   }
 
   selectCurrency(currency: string): void {
-    this.store().updateForm({ currency });
+    this.store.updateForm({ currency });
   }
 
   selectFrequency(value: string): void {
     const isRecurring = value !== 'one_time';
-    this.store().updateForm({
+    this.store.updateForm({
       donationType: isRecurring ? 'recurring' : 'one_time',
       frequency: isRecurring ? value : null,
     });
@@ -77,7 +80,7 @@ export class DonationStep1 {
     const current = this.state().targetId;
     const target = this.config()?.targets.find((t) => t.id === id);
     if (target?.isLocked) return;
-    this.store().updateForm({ targetId: current === id ? null : id });
+    this.store.updateForm({ targetId: current === id ? null : id });
   }
 
   private getDonationType(): 'one_time' | 'recurring' {
@@ -91,6 +94,6 @@ export class DonationStep1 {
   }
 
   next(): void {
-    if (this.canProceed()) this.store().nextStep();
+    if (this.canProceed()) this.store.nextStep();
   }
 }

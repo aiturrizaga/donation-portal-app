@@ -3,17 +3,13 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { PortalSystemLayout } from '@core/layouts/portal-system-layout/portal-system-layout';
 import { DatePipe } from '@angular/common';
-
-const DOCUMENT_TYPES = [
-  { label: 'DNI', value: 'dni' },
-  { label: 'RUC', value: 'ruc' },
-  { label: 'CE', value: 'ce' },
-  { label: 'Pasaporte', value: 'passport' },
-];
+import { DOCUMENT_TYPES } from '../../models/donation.model';
+import { getFieldError } from '@shared/utils/form-validation.util';
+import { TextField } from '@shared/ui/text-field/text-field';
 
 @Component({
   selector: 'app-complaints-book-page',
-  imports: [ReactiveFormsModule, PortalSystemLayout, DatePipe],
+  imports: [ReactiveFormsModule, PortalSystemLayout, DatePipe, TextField],
   templateUrl: './complaints-book.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'contents' },
@@ -23,6 +19,7 @@ export class ComplaintsBookPage {
 
   readonly documentTypes = DOCUMENT_TYPES;
   readonly today = new Date();
+  protected readonly getFieldError = getFieldError;
 
   readonly form = this.#fb.group({
     // 2. Consumidor

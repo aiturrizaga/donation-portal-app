@@ -33,7 +33,7 @@
     </div>
     <div class="flex justify-between py-2.5 text-sm">
       <span class="text-gray-500">Frecuencia</span>
-      <span class="font-medium text-gray-900">{{ getFrequencyLabel() }}</span>
+      <span class="font-medium text-gray-900">{{ store.frequencyLabel() }}</span>
     </div>
     <div class="flex justify-between py-2.5 text-sm">
       <span class="text-gray-500">Total</span>
@@ -92,12 +92,15 @@
     [class.text-white]="state().privacyPolicy"
     [class.bg-gray-100]="!state().privacyPolicy"
     [class.text-gray-400]="!state().privacyPolicy"
-    [disabled]="!state().privacyPolicy || store().submitting()"
+    [disabled]="!state().privacyPolicy || store.submitting() || openingCheckout()"
     (click)="submit()"
   >
-    @if (store().submitting()) {
-      <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-      Procesando...
+    @if (openingCheckout()) {
+      <app-spinner variant="white" />
+      Abriendo pago seguro...
+    } @else if (store.submitting()) {
+      <app-spinner variant="white" />
+      Procesando, no cierres esta ventana...
     } @else {
       <i class="ti ti-lock text-base"></i>
       Donar {{ getCurrencySymbol(state().currency) }} {{ state().amount }} de forma segura

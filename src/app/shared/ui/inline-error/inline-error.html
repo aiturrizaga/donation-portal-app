@@ -1,0 +1,13 @@
+<div class="flex items-start gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2" role="alert">
+  <i class="ti ti-alert-triangle text-base text-red-500 mt-0.5 shrink-0"></i>
+  <div class="flex-1 flex items-center justify-between gap-2">
+    <span class="text-xs text-red-600">{{ message() }}</span>
+    <button
+      type="button"
+      class="text-xs font-semibold text-red-700 hover:text-red-800 underline shrink-0 cursor-pointer"
+      (click)="retry.emit()"
+    >
+      Reintentar
+    </button>
+  </div>
+</div>

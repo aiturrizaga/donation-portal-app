@@ -1,0 +1,41 @@
+<div class="flex flex-col gap-1">
+  @if (label()) {
+    <label
+      class="text-xs"
+      [class.font-semibold]="tone() === 'default'"
+      [class.uppercase]="tone() === 'default'"
+      [class.tracking-wide]="tone() === 'default'"
+      [class.text-gray-500]="tone() === 'default'"
+      [class.text-zinc-600]="tone() === 'muted'"
+    >{{ label() }}<span
+      class="text-gray-400 font-normal normal-case tracking-normal ml-1"
+      >{{ hint() }}</span
+    ></label>
+  }
+
+  @if (multiline()) {
+    <textarea
+      [formControl]="control()"
+      [placeholder]="placeholder()"
+      [rows]="rows()"
+      class="rounded-lg px-3 py-2.5 text-sm resize-y focus:outline-none focus:border-emerald-500 border"
+      [class.border-gray-200]="tone() === 'default' && !errorMessage()"
+      [class.border-zinc-200]="tone() === 'muted' && !errorMessage()"
+      [class.border-red-300]="errorMessage()"
+    ></textarea>
+  } @else {
+    <input
+      [type]="type()"
+      [formControl]="control()"
+      [placeholder]="placeholder()"
+      class="rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500 border"
+      [class.border-gray-200]="tone() === 'default' && !errorMessage()"
+      [class.border-zinc-200]="tone() === 'muted' && !errorMessage()"
+      [class.border-red-300]="errorMessage()"
+    />
+  }
+
+  @if (errorMessage(); as msg) {
+    <span class="text-xs text-red-500">{{ msg }}</span>
+  }
+</div>

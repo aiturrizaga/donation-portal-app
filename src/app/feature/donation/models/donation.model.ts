@@ -2,9 +2,6 @@ export interface DonationPage {
   id: string;
   name: string;
   slug: string;
-  description: string | null;
-  welcomeText: string | null;
-  thankYouText: string | null;
   allowsRecurring: boolean;
   suggestedAmounts: number[] | null;
   organizationName: string;
@@ -20,6 +17,10 @@ export interface PageBranding {
   faviconUrl: string | null;
   primaryColor: string;
   secondaryColor: string | null;
+  // Public hero copy — NULL falls back to this app's own default copy
+  // (see donation-landing.ts).
+  heroHeading: string | null;
+  welcomeText: string | null;
 }
 
 export interface DonationFormConfig {
@@ -62,6 +63,10 @@ export interface DonationGateway {
   rsaPublicKey: string | null;
   testMode: boolean;
   isDefault: boolean;
+  // Which Culqi Custom Checkout payment method tabs to show — configured
+  // from the admin panel (Pasarelas de pago). Only 'tarjeta' has a
+  // verified backend integration; see culqi-checkout.service.ts.
+  enabledPaymentMethods: string[];
 }
 
 // Form state accumulated across steps
@@ -89,11 +94,21 @@ export interface DonationFormState {
   // Step 3
   gatewayId: number | null;
   culqiToken: string | null;
+  // Culqi3DS.generateDevice() — sent on every card charge as
+  // antifraud_details.device_finger_print_id, not only 3DS-specific ones.
+  culqiDeviceId: string | null;
   paymentMethod: string;
   privacyPolicy: boolean;
 }
 
 export type DocumentType = 'dni' | 'ruc' | 'ce' | 'passport';
+
+export const DOCUMENT_TYPES: { label: string; value: DocumentType }[] = [
+  { label: 'DNI', value: 'dni' },
+  { label: 'RUC', value: 'ruc' },
+  { label: 'CE', value: 'ce' },
+  { label: 'Pasaporte', value: 'passport' },
+];
 
 export const INITIAL_FORM_STATE: DonationFormState = {
   targetId: null,
@@ -115,6 +130,7 @@ export const INITIAL_FORM_STATE: DonationFormState = {
   district: null,
   gatewayId: null,
   culqiToken: null,
+  culqiDeviceId: null,
   paymentMethod: 'card',
   privacyPolicy: false,
 };
@@ -146,6 +162,14 @@ export interface DonationSubmitResponse {
   amount: number;
   currency: string;
   certificateNumber: string | null;
+  certificateFileUrl: string | null;
+  // Set only when status is "processing" (PagoEfectivo) — the CIP code the
+  // donor pays with later, offline. No certificate exists yet for this
+  // case: it's only generated once a webhook confirms the payment.
+  paymentCode: string | null;
+  // Set when status is "requires_3ds" — echoed back on POST
+  // .../confirm-3ds so the backend can find the exact in-flight attempt.
+  paymentAttemptId: string | null;
   donorFirstName: string | null;
   confirmHeading: string;
   confirmMessage: string | null;

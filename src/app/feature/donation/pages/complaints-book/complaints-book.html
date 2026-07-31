@@ -34,15 +34,12 @@
       </div>
 
       <div class="flex flex-col gap-2.5">
-        <div class="flex flex-col gap-1">
-          <label class="text-xs text-zinc-600">Nombre completo</label>
-          <input
-            type="text"
-            formControlName="fullName"
-            placeholder="Juan Pérez García"
-            class="border border-zinc-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500"
-          />
-        </div>
+        <app-text-field
+          label="Nombre completo"
+          placeholder="Juan Pérez García"
+          tone="muted"
+          [control]="form.controls.fullName"
+        />
 
         <div class="flex gap-2.5">
           <div class="flex flex-col gap-1 w-28">
@@ -56,47 +53,40 @@
               }
             </select>
           </div>
-          <div class="flex flex-col gap-1 flex-1">
-            <label class="text-xs text-zinc-600">N° documento</label>
-            <input
-              type="text"
-              formControlName="documentNumber"
-              placeholder="12345678"
-              class="border border-zinc-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500"
-            />
-          </div>
+          <app-text-field
+            class="flex-1"
+            label="N° documento"
+            placeholder="12345678"
+            tone="muted"
+            [control]="form.controls.documentNumber"
+          />
         </div>
 
         <div class="flex gap-2.5">
-          <div class="flex flex-col gap-1 flex-1">
-            <label class="text-xs text-zinc-600">Correo</label>
-            <input
-              type="email"
-              formControlName="email"
-              placeholder="juan@correo.com"
-              class="border border-zinc-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500"
-            />
-          </div>
-          <div class="flex flex-col gap-1 flex-1">
-            <label class="text-xs text-zinc-600">Teléfono</label>
-            <input
-              type="tel"
-              formControlName="phone"
-              placeholder="999 999 999"
-              class="border border-zinc-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500"
-            />
-          </div>
-        </div>
-
-        <div class="flex flex-col gap-1">
-          <label class="text-xs text-zinc-600">Domicilio</label>
-          <input
-            type="text"
-            formControlName="address"
-            placeholder="Av. Ejemplo 123, Lima"
-            class="border border-zinc-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500"
+          <app-text-field
+            class="flex-1"
+            label="Correo"
+            type="email"
+            placeholder="juan@correo.com"
+            tone="muted"
+            [control]="form.controls.email"
+          />
+          <app-text-field
+            class="flex-1"
+            label="Teléfono"
+            type="tel"
+            placeholder="999 999 999"
+            tone="muted"
+            [control]="form.controls.phone"
           />
         </div>
+
+        <app-text-field
+          label="Domicilio"
+          placeholder="Av. Ejemplo 123, Lima"
+          tone="muted"
+          [control]="form.controls.address"
+        />
 
         <!-- Menor de edad -->
         <label class="flex items-center gap-2 cursor-pointer mt-0.5">
@@ -105,15 +95,12 @@
         </label>
 
         @if (showGuardian()) {
-          <div class="flex flex-col gap-1">
-            <label class="text-xs text-zinc-600">Nombre del padre, madre o apoderado</label>
-            <input
-              type="text"
-              formControlName="guardianName"
-              placeholder="Nombre del apoderado"
-              class="border border-zinc-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500"
-            />
-          </div>
+          <app-text-field
+            label="Nombre del padre, madre o apoderado"
+            placeholder="Nombre del apoderado"
+            tone="muted"
+            [control]="form.controls.guardianName"
+          />
         }
       </div>
 
@@ -199,24 +186,26 @@
         </div>
       </div>
 
-      <div class="flex flex-col gap-1 mb-2.5">
-        <label class="text-xs text-zinc-600">Detalle del reclamo</label>
-        <textarea
-          formControlName="detail"
-          rows="3"
+      <div class="mb-2.5">
+        <app-text-field
+          label="Detalle del reclamo"
           placeholder="Describe lo sucedido…"
-          class="border border-zinc-200 rounded-lg px-3 py-2.5 text-sm resize-y focus:outline-none focus:border-emerald-500"
-        ></textarea>
+          tone="muted"
+          [multiline]="true"
+          [rows]="3"
+          [control]="form.controls.detail"
+        />
       </div>
 
-      <div class="flex flex-col gap-1 mb-3.5">
-        <label class="text-xs text-zinc-600">Tu pedido</label>
-        <textarea
-          formControlName="request"
-          rows="2"
+      <div class="mb-3.5">
+        <app-text-field
+          label="Tu pedido"
           placeholder="¿Qué solución esperas?"
-          class="border border-zinc-200 rounded-lg px-3 py-2.5 text-sm resize-y focus:outline-none focus:border-emerald-500"
-        ></textarea>
+          tone="muted"
+          [multiline]="true"
+          [rows]="2"
+          [control]="form.controls.request"
+        />
       </div>
 
       <!-- Consentimiento -->
@@ -227,6 +216,9 @@
           (Ley 29733).
         </span>
       </label>
+      @if (getFieldError(form.controls.dataConsent); as msg) {
+        <span class="text-xs text-red-500 -mt-2.5 mb-3.5">{{ msg }}</span>
+      }
 
       <!-- Aviso de plazo -->
       <div class="flex gap-2 p-3 bg-amber-100 rounded-lg mb-4">

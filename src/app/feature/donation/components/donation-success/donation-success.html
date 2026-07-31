@@ -1,5 +1,23 @@
 <div class="flex flex-col items-center px-6 py-8 gap-5 text-center">
 
+@if (awaitingConfirmation()) {
+  <!-- Recurring subscription's first charge is still awaiting webhook
+       confirmation — see DonationStore.pollConfirmation. -->
+  <div class="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center">
+    <i class="ti ti-loader-2 text-3xl text-emerald-500 animate-spin"></i>
+  </div>
+  <div class="flex flex-col gap-1">
+    <h2 class="text-xl font-bold text-gray-900">Confirmando tu donación...</h2>
+    <p class="text-sm text-gray-500">
+      Estamos verificando el cobro de
+      <span class="font-semibold text-emerald-600">
+        {{ getCurrencySymbol(result()?.currency ?? 'PEN') }} {{ result()?.amount }}
+      </span>
+      con tu banco. Esto toma solo unos segundos.
+    </p>
+  </div>
+} @else {
+
   <!-- Check icon -->
   <div class="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center">
     <i class="ti ti-circle-check text-3xl text-emerald-500"></i>
@@ -20,11 +38,33 @@
     @if (result()?.confirmMessage) {
       <p class="text-sm text-gray-500 mt-1">{{ result()!.confirmMessage }}</p>
     }
-    <p class="text-xs text-emerald-500 mt-1">
-      Tu certificado llegará a
-      <span class="font-medium">{{ store().formState().email }}</span>
-    </p>
+    @if (isProcessing()) {
+      <p class="text-xs text-amber-600 mt-1">
+        Te avisaremos por correo a
+        <span class="font-medium">{{ store.formState().email }}</span>
+        en cuanto se confirme tu pago.
+      </p>
+    } @else {
+      <p class="text-xs text-emerald-500 mt-1">
+        Tu certificado llegará a
+        <span class="font-medium">{{ store.formState().email }}</span>
+      </p>
+    }
   </div>
+
+  <!-- PagoEfectivo: pago diferido, aún no hay certificado. Only rendered
+       when there's an actual CIP code to show — a card-based recurring
+       subscription is ALSO "processing" while its first charge awaits
+       webhook confirmation, but has no paymentCode at all. -->
+  @if (isProcessing() && result()?.paymentCode) {
+    <div class="flex flex-col gap-2 px-4 py-4 bg-amber-50 rounded-xl w-full">
+      <span class="text-xs text-amber-700 font-medium">Código de pago (CIP)</span>
+      <span class="text-2xl font-bold text-amber-800 tracking-wider">{{ result()?.paymentCode }}</span>
+      <p class="text-xs text-amber-600">
+        Paga con este código en banca móvil, agentes o bodegas afiliadas. Tienes 24 horas.
+      </p>
+    </div>
+  }
 
   <!-- Quote -->
   @if (result()?.confirmQuoteText) {
@@ -38,23 +78,21 @@
 
   <!-- Actions -->
   <div class="flex flex-col items-center gap-2 w-full">
-    <button
-      type="button"
-      (click)="viewCertificate()"
-      class="w-full py-3 rounded-xl bg-emerald-500 text-white text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer"
-    >
-      <i class="ti ti-certificate text-base"></i>
-      Ver mi certificado
-    </button>
+    @if (!isProcessing()) {
+      <button
+        type="button"
+        (click)="viewCertificate()"
+        class="w-full py-3 rounded-xl bg-emerald-500 text-white text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer"
+      >
+        <i class="ti ti-certificate text-base"></i>
+        Ver mi certificado
+      </button>
 
-    <button
-      type="button"
-      (click)="share()"
-      class="w-full py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm font-medium flex items-center justify-center gap-1.5 cursor-pointer"
-    >
-      <i class="ti ti-share text-base"></i>
-      Compartir mi donación
-    </button>
+      <app-secondary-button (click)="share()">
+        <i class="ti ti-share text-base"></i>
+        Compartir mi donación
+      </app-secondary-button>
+    }
 
     <button
       type="button"
@@ -65,5 +103,7 @@
       Hacer otra donación
     </button>
   </div>
+
+}
 
 </div>
