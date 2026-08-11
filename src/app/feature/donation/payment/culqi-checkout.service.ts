@@ -280,11 +280,18 @@ export class CulqiCheckoutService {
     currency: string,
     organizationName: string,
     donorEmail: string,
+    donorFirstName?: string | null,
+    donorLastName?: string | null,
   ): Observable<PaymentResult> {
     const result$ = new Subject<PaymentResult>();
 
     this.#loadScript()
-      .then(() => this.#openCheckout(gateway, amount, currency, organizationName, donorEmail, result$))
+      .then(() =>
+        this.#openCheckout(
+          gateway, amount, currency, organizationName, donorEmail,
+          donorFirstName, donorLastName, result$,
+        ),
+      )
       .catch((err: Error) => {
         result$.next({ kind: 'error', message: err.message });
         result$.complete();
@@ -299,6 +306,8 @@ export class CulqiCheckoutService {
     currency: string,
     organizationName: string,
     donorEmail: string,
+    donorFirstName: string | null | undefined,
+    donorLastName: string | null | undefined,
     result$: Subject<PaymentResult>,
   ): void {
     const CulqiCheckoutCtor = window.CulqiCheckout;
@@ -314,7 +323,11 @@ export class CulqiCheckoutService {
         currency,
         amount: Math.round(amount * 100), // Culqi expects cents
       },
-      client: { email: donorEmail },
+      client: {
+        email: donorEmail,
+        ...(donorFirstName ? { first_name: donorFirstName } : {}),
+        ...(donorLastName ? { last_name: donorLastName } : {}),
+      },
       options: {
         lang: 'es',
         installments: false,

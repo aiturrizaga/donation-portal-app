@@ -26,7 +26,7 @@ export interface CulqiOptions {
 
 export interface CulqiConfig {
   settings: CulqiSettings;
-  client: { email: string };
+  client: { email: string; first_name?: string; last_name?: string };
   options: CulqiOptions;
 }
 

@@ -147,6 +147,8 @@ export class DonationStep3 {
         this.state().currency,
         page.organizationName,
         this.state().email,
+        this.state().firstName,
+        this.state().lastName,
       )
       .subscribe(async (result) => {
         switch (result.kind) {
