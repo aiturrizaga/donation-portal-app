@@ -4,6 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { PortalSystemLayout } from '@core/layouts/portal-system-layout/portal-system-layout';
 import { PortalLegalPage } from '../../api/legal-page.api';
+import { normalizeRichText } from '@shared/utils/rich-text.util';
 
 @Component({
   selector: 'app-legal-page-detail-page',
@@ -22,5 +23,5 @@ export class LegalPageDetailPage {
   );
 
   readonly title = computed(() => this.page()?.title ?? '');
-  readonly content = computed(() => this.page()?.content ?? '');
+  readonly content = computed(() => normalizeRichText(this.page()?.content) ?? '');
 }

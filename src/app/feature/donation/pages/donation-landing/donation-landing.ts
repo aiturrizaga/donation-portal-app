@@ -9,6 +9,7 @@ import { DonationPage } from '../../models/donation.model';
 import { LegalPageApi } from '../../api/legal-page.api';
 import { PortalHeader } from '@shared/ui/portal-header/portal-header';
 import { PortalFooter } from '@shared/ui/portal-footer/portal-footer';
+import { normalizeRichText } from '@shared/utils/rich-text.util';
 import { environment } from '@env/environment';
 
 @Component({
@@ -69,8 +70,8 @@ export class DonationLandingPage {
     return path ? `${environment.apiUrl}${path}` : null;
   });
   readonly faviconUrl = computed(() => this.branding()?.faviconUrl ?? null);
-  readonly heroHeading = computed(() => this.branding()?.heroHeading ?? null);
-  readonly welcomeText = computed(() => this.branding()?.welcomeText ?? null);
+  readonly heroHeading = computed(() => normalizeRichText(this.branding()?.heroHeading));
+  readonly welcomeText = computed(() => normalizeRichText(this.branding()?.welcomeText));
   readonly orgName = computed(() => this.store.page()?.organizationName ?? '');
 
   readonly backgroundStyle = computed(() => {

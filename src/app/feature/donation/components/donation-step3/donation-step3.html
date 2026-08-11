@@ -54,8 +54,12 @@
   <!-- Gateway -->
   @if (getDefaultGateway(); as gw) {
     <div class="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3">
-      <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center shrink-0">
-        <span class="text-xs font-bold text-gray-600 uppercase">{{ gw.provider[0] }}</span>
+      <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
+        @if (gw.provider === 'culqi') {
+          <img src="/culqi-logo.webp" alt="Culqi" class="w-full h-full object-cover" />
+        } @else {
+          <span class="text-xs font-bold text-gray-600 uppercase">{{ gw.provider[0] }}</span>
+        }
       </div>
       <div class="flex flex-col">
         <span class="text-sm font-semibold text-gray-800">
