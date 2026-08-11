@@ -28,25 +28,24 @@ export class DonationStep1 {
   );
 
   getFrequencyLabel(value: string): string {
-    if (value === 'one_time') return 'Única vez';
-    if (value === '1') return 'Mensual';
-    if (value === '12') return 'Anual';
-    // Fixed-term pledge: charged monthly for exactly `value` months, then
-    // stops automatically (see ChargeDonationUseCase.frequency_to_plan,
-    // backend). "Por N meses" reads unambiguously as a duration — the
-    // previous "N meses" label was easy to misread as "every N months".
-    return `Por ${value} meses`;
+    // Etiqueta tal cual viene del catálogo `frequency_options` del admin —
+    // ya no se traduce/adivina acá. El fallback genérico solo cubre un
+    // value sin entrada en el catálogo (no debería pasar en uso normal).
+    const label = this.config()?.frequencyLabels?.[value];
+    if (label) return label;
+    return value === 'one_time' ? 'Única vez' : `Por ${value} meses`;
   }
 
-  getImpactMessage(amount: number | null, frequency: string | null): string | null {
-    if (!amount) return null;
-    if (frequency === 'one_time' || !frequency) {
-      if (amount >= 100) return `Tu aporte de ${amount} ayuda a financiar una beca.`;
-      if (amount >= 50) return `Tu aporte ayuda a 2 estudiantes este mes.`;
-      return `Tu aporte hace la diferencia.`;
-    }
-    return `Tu aporte mensual ayuda a 3 niños a estudiar.`;
-  }
+  // Uno se elige al azar por carga de página, desde la lista configurada en
+  // el admin (Objetivo > Formulario > Mensajes de impacto) — computed()
+  // solo reevalúa cuando cambia la referencia de config(), es decir una vez
+  // por carga, no en cada change detection. Sin mensajes configurados, no
+  // se muestra nada (sin texto de respaldo hardcodeado).
+  readonly impactMessage = computed(() => {
+    const messages = this.config()?.impactMessages;
+    if (!messages || messages.length === 0) return null;
+    return messages[Math.floor(Math.random() * messages.length)];
+  });
 
   selectAmount(amount: number): void {
     this.showCustom.set(false);

@@ -62,7 +62,7 @@
           Pago seguro vía {{ gw.provider | titlecase }}
         </span>
         <span class="text-xs text-gray-400">
-          {{ gw.testMode ? 'Modo sandbox' : 'SSL 256-bit · PCI DSS Level 1' }}
+          {{ getCardBrandsText(gw) }}
         </span>
       </div>
     </div>
@@ -78,11 +78,18 @@
     />
     <span class="text-xs text-gray-500">
       Acepto las
-      <a href="/privacidad" target="_blank" class="text-emerald-600 underline">políticas de privacidad</a>
+      <button type="button" (click)="openPrivacyModal()" class="text-emerald-600 underline cursor-pointer">políticas de privacidad</button>
       y los
-      <a href="/terminos" target="_blank" class="text-emerald-600 underline">términos de uso.</a>
+      <button type="button" (click)="openTermsModal()" class="text-emerald-600 underline cursor-pointer">términos de uso.</button>
     </span>
   </label>
+
+  <app-legal-content-modal
+    [open]="legalModal() !== null"
+    [title]="legalModal()?.title ?? ''"
+    [content]="legalModal()?.content ?? ''"
+    (closed)="closeLegalModal()"
+  />
 
   <!-- CTA -->
   <button

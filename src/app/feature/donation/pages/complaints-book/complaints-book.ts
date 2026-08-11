@@ -1,9 +1,11 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { PortalSystemLayout } from '@core/layouts/portal-system-layout/portal-system-layout';
 import { DatePipe } from '@angular/common';
 import { DOCUMENT_TYPES } from '../../models/donation.model';
+import { ComplaintSubmitResponse } from '../../models/complaint.model';
+import { ComplaintApi } from '../../api/complaint.api';
 import { getFieldError } from '@shared/utils/form-validation.util';
 import { TextField } from '@shared/ui/text-field/text-field';
 
@@ -16,10 +18,15 @@ import { TextField } from '@shared/ui/text-field/text-field';
 })
 export class ComplaintsBookPage {
   readonly #fb = inject(FormBuilder);
+  readonly #api = inject(ComplaintApi);
 
   readonly documentTypes = DOCUMENT_TYPES;
   readonly today = new Date();
   protected readonly getFieldError = getFieldError;
+
+  readonly submitting = signal(false);
+  readonly submitted = signal<ComplaintSubmitResponse | null>(null);
+  readonly submitError = signal<string | null>(null);
 
   readonly form = this.#fb.group({
     // 2. Consumidor
@@ -85,7 +92,18 @@ export class ComplaintsBookPage {
     }
 
     const payload = this.form.getRawValue();
-    // TODO: conectar al backend cuando exista el endpoint del libro de reclamaciones
-    console.log('Reclamación a enviar:', payload);
+    this.submitting.set(true);
+    this.submitError.set(null);
+
+    this.#api.submit(payload).subscribe({
+      next: (response) => {
+        this.submitting.set(false);
+        this.submitted.set(response);
+      },
+      error: () => {
+        this.submitting.set(false);
+        this.submitError.set('No se pudo enviar la reclamación. Inténtalo nuevamente.');
+      },
+    });
   }
 }

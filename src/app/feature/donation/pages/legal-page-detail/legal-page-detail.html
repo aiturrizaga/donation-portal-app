@@ -1,0 +1,12 @@
+<app-portal-system-layout>
+  <div class="w-full max-w-xl mx-auto">
+
+    <div class="flex items-center gap-2.5 mb-4">
+      <i class="ti ti-file-text text-2xl text-zinc-800"></i>
+      <h1 class="text-lg font-medium text-zinc-800">{{ title() }}</h1>
+    </div>
+
+    <div class="text-sm text-zinc-600 leading-relaxed [&_p]:mb-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5" [innerHTML]="content()"></div>
+
+  </div>
+</app-portal-system-layout>

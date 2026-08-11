@@ -101,12 +101,10 @@ export const DonationStore = signalStore(
     frequencyLabel: computed(() => {
       const freq = formState().frequency;
       if (!freq || freq === 'one_time') return 'Única vez';
-      if (freq === '1') return 'Mensual';
-      if (freq === '12') return 'Anual';
-      // Fixed-term pledge: monthly charge for exactly `freq` months, then
-      // auto-cancelled (backend: ChargeDonationUseCase.frequency_to_plan).
-      // "Por N meses" — the previous "Cada N meses" read as an interval
-      // ("every N months"), not a duration, which is what this actually is.
+      // Etiqueta tal cual viene del catálogo `frequency_options` del admin
+      // — ya no se traduce/adivina acá (ver DonationStep1.getFrequencyLabel).
+      const label = page()?.formConfig?.frequencyLabels?.[freq];
+      if (label) return label;
       return `Por ${freq} meses`;
     }),
     stepClass: computed(() => (direction() === 'forward' ? 'step-enter' : 'step-enter-back')),

@@ -11,12 +11,21 @@ import { DonationStore } from '../../store/donation.store';
 import { TitleCasePipe } from '@angular/common';
 import { getCurrencySymbol } from '@shared/utils/currency.util';
 import { Spinner } from '@shared/ui/spinner/spinner';
+import { LegalContentModal } from '@shared/ui/legal-content-modal/legal-content-modal';
 import { CulqiCheckoutService } from '../../payment/culqi-checkout.service';
 import { DonationGateway, DonationSubmitResponse } from '../../models/donation.model';
 
+const CARD_BRAND_LABELS: Record<string, string> = {
+  visa: 'Visa',
+  mastercard: 'Mastercard',
+  amex: 'American Express',
+  diners: 'Diners Club',
+};
+const ALL_CARD_BRANDS = Object.keys(CARD_BRAND_LABELS);
+
 @Component({
   selector: 'app-donation-step3',
-  imports: [FormsModule, TitleCasePipe, Spinner],
+  imports: [FormsModule, TitleCasePipe, Spinner, LegalContentModal],
   templateUrl: './donation-step3.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -30,6 +39,26 @@ export class DonationStep3 {
   readonly page = computed(() => this.store.page());
 
   readonly privacyAccepted = computed(() => this.state().privacyPolicy);
+
+  readonly legalModal = signal<{ title: string; content: string } | null>(null);
+
+  openPrivacyModal(): void {
+    this.legalModal.set({
+      title: 'Política de privacidad',
+      content: this.config()?.privacyPolicyContent ?? '',
+    });
+  }
+
+  openTermsModal(): void {
+    this.legalModal.set({
+      title: 'Términos de uso',
+      content: this.config()?.termsOfServiceContent ?? '',
+    });
+  }
+
+  closeLegalModal(): void {
+    this.legalModal.set(null);
+  }
 
   // Distinct from store.submitting() (which covers the backend call) —
   // this covers the SDK-load + Culqi modal window, before we ever touch
@@ -62,6 +91,18 @@ export class DonationStep3 {
 
   getDefaultGateway(): DonationGateway | null {
     return this.config()?.gateways.find((g) => g.isDefault) ?? this.config()?.gateways[0] ?? null;
+  }
+
+  getCardBrandsText(gateway: DonationGateway): string {
+    const brands = gateway.enabledCardBrands ?? [];
+    if (brands.length === 0) return '';
+
+    const allEnabled = ALL_CARD_BRANDS.every((brand) => brands.includes(brand));
+    if (allEnabled) return 'Aceptamos todas las tarjetas';
+
+    const labels = brands.map((brand) => CARD_BRAND_LABELS[brand] ?? brand);
+    if (labels.length === 1) return `Aceptamos ${labels[0]}`;
+    return `Aceptamos ${labels.slice(0, -1).join(', ')} y ${labels[labels.length - 1]}`;
   }
 
   togglePrivacy(value: boolean): void {

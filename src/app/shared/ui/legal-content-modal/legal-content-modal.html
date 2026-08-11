@@ -1,0 +1,25 @@
+@if (open()) {
+  <div
+    class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 px-0 sm:px-4"
+    (click)="close()"
+  >
+    <div
+      class="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl max-h-[85vh] flex flex-col shadow-xl"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="flex items-center justify-between px-5 py-4 border-b border-zinc-100 shrink-0">
+        <h2 class="text-base font-medium text-zinc-800">{{ title() }}</h2>
+        <button
+          type="button"
+          (click)="close()"
+          class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-zinc-100 cursor-pointer"
+        >
+          <i class="ti ti-x text-lg text-zinc-500"></i>
+        </button>
+      </div>
+      <div class="px-5 py-4 overflow-y-auto text-sm text-zinc-600 leading-relaxed">
+        <div [innerHTML]="content()"></div>
+      </div>
+    </div>
+  </div>
+}

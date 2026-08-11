@@ -153,7 +153,7 @@
   }
 
   <!-- Impact message -->
-  @if (getImpactMessage(state().amount, state().frequency); as msg) {
+  @if (impactMessage(); as msg) {
     <div class="flex items-center gap-2 text-xs text-emerald-600 bg-emerald-50 rounded-lg px-3 py-2">
       <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
       {{ msg }}

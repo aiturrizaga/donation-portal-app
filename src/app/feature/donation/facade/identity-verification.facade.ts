@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { DonationApi } from '../api/donation.api';
-import { IdentityVerifyResponse, UbigeoItem } from '../models/donation.model';
+import { IdentityVerifyResponse } from '../models/donation.model';
 
 /**
  * Owns the identity-verification + Peru ubigeo (department/province/district) cascade
@@ -15,11 +15,17 @@ export class IdentityVerificationFacade {
   readonly verified = signal<IdentityVerifyResponse | null>(null);
   readonly verifyError = signal(false);
 
-  readonly departments = signal<UbigeoItem[]>([]);
-  readonly provinces = signal<UbigeoItem[]>([]);
-  readonly districts = signal<UbigeoItem[]>([]);
+  readonly departments = signal<string[]>([]);
+  readonly provinces = signal<string[]>([]);
+  readonly districts = signal<string[]>([]);
   readonly loadingProvinces = signal(false);
   readonly loadingDistricts = signal(false);
+
+  // Resolved once department + province + district are all selected — see
+  // resolveUbigeo(). null until then, or if the triple doesn't match any
+  // row (stale SUNAT casing, catalog gap).
+  readonly ubigeoId = signal<string | null>(null);
+  readonly resolvingUbigeo = signal(false);
 
   verify(documentType: string, documentNumber: string): void {
     if (documentType === 'ce' || documentType === 'passport') return;
@@ -63,9 +69,9 @@ export class IdentityVerificationFacade {
     });
   }
 
-  loadDistricts(province: string): void {
+  loadDistricts(department: string, province: string): void {
     this.loadingDistricts.set(true);
-    this.#api.getDistricts(province).subscribe({
+    this.#api.getDistricts(department, province).subscribe({
       next: (data) => {
         this.districts.set(data);
         this.loadingDistricts.set(false);
@@ -81,5 +87,25 @@ export class IdentityVerificationFacade {
 
   resetDistricts(): void {
     this.districts.set([]);
+  }
+
+  // Called once department + province + district are all selected — the
+  // resolved id is what actually gets persisted (see DonationFormState.ubigeoId).
+  resolveUbigeo(department: string, province: string, district: string): void {
+    this.resolvingUbigeo.set(true);
+    this.#api.searchUbigeo(department, province, district).subscribe({
+      next: (result) => {
+        this.ubigeoId.set(result.id);
+        this.resolvingUbigeo.set(false);
+      },
+      error: () => {
+        this.ubigeoId.set(null);
+        this.resolvingUbigeo.set(false);
+      },
+    });
+  }
+
+  resetUbigeo(): void {
+    this.ubigeoId.set(null);
   }
 }

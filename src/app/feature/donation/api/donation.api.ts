@@ -8,7 +8,7 @@ import {
   DonationFormState,
   DonationSubmitResponse,
   IdentityVerifyResponse,
-  UbigeoItem,
+  UbigeoResolved,
 } from '../models/donation.model';
 
 interface ApiResponse<T> {
@@ -63,9 +63,7 @@ export class DonationApi {
         phone: state.phone,
         address: state.address,
         country: state.country,
-        department: state.department,
-        province: state.province,
-        district: state.district,
+        ubigeoId: state.ubigeoId,
       },
       amount: {
         targetId: state.targetId,
@@ -155,21 +153,35 @@ export class DonationApi {
       .pipe(map((r) => r.data));
   }
 
-  getDepartments(): Observable<UbigeoItem[]> {
+  getDepartments(): Observable<string[]> {
     return this.#http
-      .get<ApiResponse<UbigeoItem[]>>(`${this.#base}/ubigeo/departments`)
+      .get<ApiResponse<string[]>>(`${this.#base}/ubigeo/departments`)
       .pipe(map((r) => r.data));
   }
 
-  getProvinces(department: string): Observable<UbigeoItem[]> {
+  getProvinces(department: string): Observable<string[]> {
     return this.#http
-      .get<ApiResponse<UbigeoItem[]>>(`${this.#base}/ubigeo/provinces?department=${department}`)
+      .get<
+        ApiResponse<string[]>
+      >(`${this.#base}/ubigeo/provinces?department=${encodeURIComponent(department)}`)
       .pipe(map((r) => r.data));
   }
 
-  getDistricts(province: string): Observable<UbigeoItem[]> {
+  getDistricts(department: string, province: string): Observable<string[]> {
     return this.#http
-      .get<ApiResponse<UbigeoItem[]>>(`${this.#base}/ubigeo/districts?province=${province}`)
+      .get<ApiResponse<string[]>>(
+        `${this.#base}/ubigeo/districts?department=${encodeURIComponent(department)}&province=${encodeURIComponent(province)}`,
+      )
+      .pipe(map((r) => r.data));
+  }
+
+  // Resolves the selected department + province + district (names) to the
+  // single ubigeo record that identifies — its id is what actually gets
+  // persisted on the donor (see submit()'s donor.ubigeoId).
+  searchUbigeo(department: string, province: string, district: string): Observable<UbigeoResolved> {
+    const params = new URLSearchParams({ department, province, district });
+    return this.#http
+      .get<ApiResponse<UbigeoResolved>>(`${this.#base}/ubigeo/search?${params.toString()}`)
       .pipe(map((r) => r.data));
   }
 

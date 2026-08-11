@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, OnInit } from '@angular/core';
+import { TitleCasePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -12,7 +13,7 @@ import { TextField } from '@shared/ui/text-field/text-field';
 
 @Component({
   selector: 'app-donation-step2',
-  imports: [ReactiveFormsModule, Spinner, InlineError, TextField],
+  imports: [ReactiveFormsModule, Spinner, InlineError, TextField, TitleCasePipe],
   templateUrl: './donation-step2.html',
   providers: [IdentityVerificationFacade],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -99,9 +100,9 @@ export class DonationStep2 implements OnInit {
       if (result.lastName) this.form.controls.lastName.setValue(result.lastName);
       if (result.businessName) this.form.controls.businessName.setValue(result.businessName);
       if (result.address) this.form.controls.address.setValue(result.address);
-      if (result.ubigeoDepart) this.form.controls.department.setValue(result.ubigeoDepart);
-      if (result.ubigeoProv) this.form.controls.province.setValue(result.ubigeoProv);
-      if (result.ubigeoDist) this.form.controls.district.setValue(result.ubigeoDist);
+      if (result.department) this.form.controls.department.setValue(result.department);
+      if (result.province) this.form.controls.province.setValue(result.province);
+      if (result.district) this.form.controls.district.setValue(result.district);
     });
 
     // Auto-verify DNI/RUC after typing
@@ -126,6 +127,7 @@ export class DonationStep2 implements OnInit {
       this.form.controls.department.reset('');
       this.form.controls.province.reset('');
       this.form.controls.district.reset('');
+      this.identity.resetUbigeo();
     });
 
     // Load provinces when department changes
@@ -133,6 +135,7 @@ export class DonationStep2 implements OnInit {
       this.form.controls.province.reset('');
       this.form.controls.district.reset('');
       this.identity.resetProvinces();
+      this.identity.resetUbigeo();
       if (dept && this.form.controls.country.value === 'PE') {
         this.identity.loadProvinces(dept);
       }
@@ -142,7 +145,18 @@ export class DonationStep2 implements OnInit {
     this.form.controls.province.valueChanges.pipe(takeUntilDestroyed()).subscribe((prov) => {
       this.form.controls.district.reset('');
       this.identity.resetDistricts();
-      if (prov) this.identity.loadDistricts(prov);
+      this.identity.resetUbigeo();
+      const dept = this.form.controls.department.value;
+      if (prov && dept) this.identity.loadDistricts(dept, prov);
+    });
+
+    // Once all three are picked, resolve the ubigeo id — this is what
+    // actually gets submitted (see next()), never the raw names.
+    this.form.controls.district.valueChanges.pipe(takeUntilDestroyed()).subscribe((dist) => {
+      this.identity.resetUbigeo();
+      const dept = this.form.controls.department.value;
+      const prov = this.form.controls.province.value;
+      if (dist && dept && prov) this.identity.resolveUbigeo(dept, prov, dist);
     });
   }
 
@@ -191,6 +205,7 @@ export class DonationStep2 implements OnInit {
       department: v.department || null,
       province: v.province || null,
       district: v.district || null,
+      ubigeoId: this.identity.ubigeoId(),
     });
     this.store.nextStep();
   }

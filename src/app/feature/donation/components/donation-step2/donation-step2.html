@@ -105,8 +105,8 @@
             class="border border-gray-200 rounded-lg px-2 py-2.5 text-xs focus:outline-none focus:border-emerald-500 bg-white"
           >
             <option value="">Departamento</option>
-            @for (dept of identity.departments(); track dept.code) {
-              <option [value]="dept.code">{{ dept.name }}</option>
+            @for (dept of identity.departments(); track dept) {
+              <option [value]="dept">{{ dept | titlecase }}</option>
             }
           </select>
           <select
@@ -114,8 +114,8 @@
             class="border border-gray-200 rounded-lg px-2 py-2.5 text-xs focus:outline-none focus:border-emerald-500 bg-white"
           >
             <option value="">Provincia</option>
-            @for (prov of identity.provinces(); track prov.code) {
-              <option [value]="prov.code">{{ prov.name }}</option>
+            @for (prov of identity.provinces(); track prov) {
+              <option [value]="prov">{{ prov | titlecase }}</option>
             }
           </select>
           <select
@@ -123,8 +123,8 @@
             class="border border-gray-200 rounded-lg px-2 py-2.5 text-xs focus:outline-none focus:border-emerald-500 bg-white"
           >
             <option value="">Distrito</option>
-            @for (dist of identity.districts(); track dist.code) {
-              <option [value]="dist.code">{{ dist.name }}</option>
+            @for (dist of identity.districts(); track dist) {
+              <option [value]="dist">{{ dist | titlecase }}</option>
             }
           </select>
         </div>

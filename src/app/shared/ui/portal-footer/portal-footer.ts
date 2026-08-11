@@ -1,6 +1,11 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
+export interface PortalFooterLegalLink {
+  slug: string;
+  title: string;
+}
+
 @Component({
   selector: 'app-portal-footer',
   imports: [RouterLink],
@@ -14,5 +19,6 @@ export class PortalFooter {
   readonly organizationEmail = input<string>('');
   readonly organizationPhone = input<string>('');
   readonly primaryColor = input<string>('#10b981');
+  readonly legalPages = input<PortalFooterLegalLink[]>([]);
   readonly year = new Date().getFullYear();
 }

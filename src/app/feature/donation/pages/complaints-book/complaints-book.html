@@ -10,21 +10,29 @@
       Conforme al Código de Protección y Defensa del Consumidor (Ley 29571).
     </p>
 
-    <!-- Cabecera: hoja, fecha, proveedor -->
-    <div class="flex gap-3 p-3 bg-zinc-100 rounded-lg mb-5">
-      <div class="flex-1">
-        <div class="text-[11px] text-zinc-400 mb-0.5">Hoja N°</div>
-        <div class="text-sm font-medium text-zinc-800">000001</div>
+    @if (submitted(); as result) {
+      <!-- Confirmación de envío -->
+      <div class="flex flex-col items-center text-center gap-3 py-10">
+        <i class="ti ti-circle-check text-5xl text-emerald-500"></i>
+        <h2 class="text-base font-medium text-zinc-800">Reclamación registrada</h2>
+        <p class="text-sm text-zinc-500 max-w-sm">
+          Tu reclamación quedó registrada con el número de hoja
+          <span class="font-medium text-zinc-800">{{ result.sheetNumber }}</span>.
+          Te responderemos en un plazo máximo de 15 días hábiles.
+        </p>
       </div>
-      <div class="flex-1">
-        <div class="text-[11px] text-zinc-400 mb-0.5">Fecha</div>
-        <div class="text-sm font-medium text-zinc-800">{{ today | date: 'dd/MM/yyyy' }}</div>
+    } @else {
+      <!-- Cabecera: hoja, fecha, proveedor -->
+      <div class="flex gap-3 p-3 bg-zinc-100 rounded-lg mb-5">
+        <div class="flex-1">
+          <div class="text-[11px] text-zinc-400 mb-0.5">Fecha</div>
+          <div class="text-sm font-medium text-zinc-800">{{ today | date: 'dd/MM/yyyy' }}</div>
+        </div>
+        <div class="flex-2">
+          <div class="text-[11px] text-zinc-400 mb-0.5">Proveedor</div>
+          <div class="text-sm font-medium text-zinc-800">ADEU</div>
+        </div>
       </div>
-      <div class="flex-2">
-        <div class="text-[11px] text-zinc-400 mb-0.5">Proveedor</div>
-        <div class="text-sm font-medium text-zinc-800">ADEU</div>
-      </div>
-    </div>
 
     <form [formGroup]="form" class="flex flex-col">
 
@@ -228,15 +236,24 @@
         </span>
       </div>
 
+      @if (submitError(); as error) {
+        <div class="flex gap-2 p-3 bg-red-50 rounded-lg mb-4">
+          <i class="ti ti-alert-circle text-base text-red-600 shrink-0 mt-0.5"></i>
+          <span class="text-[11px] text-red-700 leading-relaxed">{{ error }}</span>
+        </div>
+      }
+
       <button
         type="button"
         (click)="submit()"
-        class="w-full bg-zinc-800 text-white text-sm font-medium py-3 rounded-lg flex items-center justify-center gap-2 transition-colors hover:bg-zinc-900 cursor-pointer"
+        [disabled]="submitting()"
+        class="w-full bg-zinc-800 text-white text-sm font-medium py-3 rounded-lg flex items-center justify-center gap-2 transition-colors hover:bg-zinc-900 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
       >
-        <i class="ti ti-send text-base"></i>
-        Enviar reclamación
+        <i class="ti text-base" [class.ti-send]="!submitting()" [class.ti-loader-2]="submitting()" [class.animate-spin]="submitting()"></i>
+        {{ submitting() ? 'Enviando…' : 'Enviar reclamación' }}
       </button>
 
     </form>
+    }
   </div>
 </app-portal-system-layout>

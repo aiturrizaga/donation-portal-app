@@ -33,12 +33,22 @@ export interface DonationFormConfig {
   amountMinCustom: number | null;
   suggestedAmounts: number[] | null;
   frequencyOptions: string[];
+  // value -> etiqueta tal cual viene del catálogo `frequency_options` del
+  // admin (/settings/lookups). Un value sin entrada en el catálogo no
+  // aparece acá — ver DonationStep1.getFrequencyLabel() para el fallback.
+  frequencyLabels: Record<string, string>;
   frequencyDefault: string;
   frequencyVisible: boolean;
+  // Textos cortos rotativos del banner de impacto (paso 1) — uno se elige al
+  // azar en el frontend por carga de página. Vacío = no se muestra nada,
+  // sin texto de respaldo hardcodeado (ver DonationStep1.impactMessage).
+  impactMessages: string[];
   confirmHeading: string;
   confirmMessage: string | null;
   confirmQuoteText: string | null;
   confirmQuoteAuthor: string | null;
+  privacyPolicyContent: string;
+  termsOfServiceContent: string;
   targets: DonationTarget[];
   gateways: DonationGateway[];
 }
@@ -67,6 +77,10 @@ export interface DonationGateway {
   // from the admin panel (Pasarelas de pago). Only 'tarjeta' has a
   // verified backend integration; see culqi-checkout.service.ts.
   enabledPaymentMethods: string[];
+  // Which card brands Culqi actually approved for this business — set once
+  // in the admin (matches Culqi's own dashboard config, there's no API to
+  // query it), used to build the "Aceptamos Visa, Mastercard..." message.
+  enabledCardBrands: string[];
 }
 
 // Form state accumulated across steps
@@ -91,6 +105,10 @@ export interface DonationFormState {
   department: string | null;
   province: string | null;
   district: string | null;
+  // Resolved by searching department+province+district against
+  // GET /v1/portal/ubigeo/search once all three are selected — this is
+  // what actually gets sent to the backend, not the raw names.
+  ubigeoId: string | null;
   // Step 3
   gatewayId: number | null;
   culqiToken: string | null;
@@ -128,6 +146,7 @@ export const INITIAL_FORM_STATE: DonationFormState = {
   department: null,
   province: null,
   district: null,
+  ubigeoId: null,
   gatewayId: null,
   culqiToken: null,
   culqiDeviceId: null,
@@ -146,9 +165,12 @@ export interface IdentityVerifyResponse {
   fullName: string | null;
   businessName: string | null;
   address: string | null;
-  ubigeoDepart: string | null;
-  ubigeoProv: string | null;
-  ubigeoDist: string | null;
+  // RUC ubigeo — department/province/district NAMES (SUNAT's own), used to
+  // prefill the cascading selects and resolved against
+  // GET /v1/portal/ubigeo/search (case-insensitive) there.
+  department: string | null;
+  province: string | null;
+  district: string | null;
   existsAsDonor: boolean;
   donorId: string | null;
 }
@@ -179,7 +201,9 @@ export interface DonationSubmitResponse {
 
 // Ubigeo
 
-export interface UbigeoItem {
-  code: string;
-  name: string;
+export interface UbigeoResolved {
+  id: string;
+  department: string;
+  province: string;
+  district: string;
 }
