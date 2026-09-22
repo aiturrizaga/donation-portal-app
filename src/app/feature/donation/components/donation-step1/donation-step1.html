@@ -12,40 +12,57 @@
   <!-- Targets -->
   @if (hasTargets()) {
     <div class="flex flex-col gap-2">
-      <span class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Grupo</span>
-      <div class="flex flex-wrap gap-2">
+      <span class="text-xs font-semibold text-gray-400 uppercase tracking-wide">{{ targetsLabel() }}</span>
 
-        <!-- Ninguno -->
-        <button
-          type="button"
-          class="px-3 py-1.5 rounded-full border text-xs font-medium transition-all cursor-pointer"
-          [class.border-emerald-500]="state().targetId === null"
-          [class.bg-emerald-50]="state().targetId === null"
-          [class.text-emerald-700]="state().targetId === null"
-          [class.border-gray-200]="state().targetId !== null"
-          [class.text-gray-500]="state().targetId !== null"
-          (click)="store.updateForm({ targetId: null })"
+      @if (showTargetsAsSelect()) {
+        <select
+          class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500"
+          [ngModel]="state().targetId ?? ''"
+          (ngModelChange)="onTargetSelectChange($event)"
         >
-          Ninguno
-        </button>
+          @if (allowNoneTarget()) {
+            <option value="">Ninguno</option>
+          }
+          @for (target of visibleTargets(); track target.id) {
+            <option [value]="target.id" [disabled]="target.isLocked">{{ target.name }}</option>
+          }
+        </select>
+      } @else {
+        <div class="flex flex-wrap gap-2">
 
-        @for (target of visibleTargets(); track target.id) {
-          <button
-            type="button"
-            class="px-3 py-1.5 rounded-full border text-xs font-medium transition-all cursor-pointer"
-            [class.border-emerald-500]="state().targetId === target.id"
-            [class.bg-emerald-50]="state().targetId === target.id"
-            [class.text-emerald-700]="state().targetId === target.id"
-            [class.border-gray-200]="state().targetId !== target.id"
-            [class.text-gray-500]="state().targetId !== target.id"
-            [disabled]="target.isLocked"
-            (click)="selectTarget(target.id)"
-          >
-            {{ target.name }}
-          </button>
-        }
+          @if (allowNoneTarget()) {
+            <button
+              type="button"
+              class="px-3 py-1.5 rounded-full border text-xs font-medium transition-all cursor-pointer"
+              [class.border-emerald-500]="state().targetId === null"
+              [class.bg-emerald-50]="state().targetId === null"
+              [class.text-emerald-700]="state().targetId === null"
+              [class.border-gray-200]="state().targetId !== null"
+              [class.text-gray-500]="state().targetId !== null"
+              (click)="store.updateForm({ targetId: null })"
+            >
+              Ninguno
+            </button>
+          }
 
-      </div>
+          @for (target of visibleTargets(); track target.id) {
+            <button
+              type="button"
+              class="px-3 py-1.5 rounded-full border text-xs font-medium transition-all cursor-pointer"
+              [class.border-emerald-500]="state().targetId === target.id"
+              [class.bg-emerald-50]="state().targetId === target.id"
+              [class.text-emerald-700]="state().targetId === target.id"
+              [class.border-gray-200]="state().targetId !== target.id"
+              [class.text-gray-500]="state().targetId !== target.id"
+              [disabled]="target.isLocked"
+              (click)="selectTarget(target.id)"
+            >
+              {{ target.name }}
+            </button>
+          }
+
+        </div>
+      }
     </div>
   }
 

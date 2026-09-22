@@ -2,6 +2,11 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { FormsModule } from '@angular/forms';
 import { DonationStore } from '../../store/donation.store';
 import { getCurrencySymbol } from '@shared/utils/currency.util';
+import { getTargetTypeLabel } from '@shared/utils/target-type.util';
+
+// Beyond this many targets, chips stop being usable — the portal switches
+// to a <select> instead (see donation-step1.html).
+const TARGETS_CHIP_LIMIT = 3;
 
 @Component({
   selector: 'app-donation-step1',
@@ -22,6 +27,20 @@ export class DonationStep1 {
   readonly visibleTargets = computed(() => this.config()?.targets.filter((t) => t.isVisible) ?? []);
 
   readonly hasTargets = computed(() => this.visibleTargets().length > 0);
+
+  readonly showTargetsAsSelect = computed(() => this.visibleTargets().length > TARGETS_CHIP_LIMIT);
+
+  readonly allowNoneTarget = computed(() => this.config()?.allowNoneTarget ?? false);
+
+  // Header label above the choices — the type of the objetivos shown, e.g.
+  // "Causa" or "Labor". Targets assigned to a single page are normally all
+  // the same type; when they aren't, falls back to a generic "Objetivo"
+  // instead of guessing which one to show.
+  readonly targetsLabel = computed(() => {
+    const types = new Set(this.visibleTargets().map((t) => t.targetType));
+    if (types.size !== 1) return 'Objetivo';
+    return getTargetTypeLabel([...types][0]);
+  });
 
   readonly selectedFreq = computed(() =>
     this.state().donationType === 'one_time' ? 'one_time' : this.state().frequency,
@@ -80,6 +99,13 @@ export class DonationStep1 {
     const target = this.config()?.targets.find((t) => t.id === id);
     if (target?.isLocked) return;
     this.store.updateForm({ targetId: current === id ? null : id });
+  }
+
+  // Bound to the <select> variant (>3 targets) — a plain value change, not
+  // the chip variant's toggle-on-reclick behavior.
+  onTargetSelectChange(value: string): void {
+    const id = value ? Number(value) : null;
+    this.store.updateForm({ targetId: id });
   }
 
   private getDonationType(): 'one_time' | 'recurring' {

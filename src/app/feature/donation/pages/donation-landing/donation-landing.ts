@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
+import { Title } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
@@ -22,6 +23,7 @@ import { environment } from '@env/environment';
 export class DonationLandingPage {
   readonly #route = inject(ActivatedRoute);
   readonly #document = inject(DOCUMENT);
+  readonly #title = inject(Title);
   readonly #legalPageApi = inject(LegalPageApi);
   readonly store = inject(DonationStore);
 
@@ -38,6 +40,7 @@ export class DonationLandingPage {
     effect(() => {
       const page = this.#page();
       if (page) this.store.init(page);
+      if (page?.name) this.#title.setTitle(page.name);
     });
 
     // Applied once per fresh load — there's no other route in this SPA that

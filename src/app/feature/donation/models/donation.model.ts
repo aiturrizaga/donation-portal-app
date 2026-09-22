@@ -43,6 +43,7 @@ export interface DonationFormConfig {
   // azar en el frontend por carga de página. Vacío = no se muestra nada,
   // sin texto de respaldo hardcodeado (ver DonationStep1.impactMessage).
   impactMessages: string[];
+  allowNoneTarget: boolean;
   confirmHeading: string;
   confirmMessage: string | null;
   confirmQuoteText: string | null;

@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { DonationStore } from '../../store/donation.store';
 import { TitleCasePipe } from '@angular/common';
 import { getCurrencySymbol } from '@shared/utils/currency.util';
+import { getTargetTypeLabel } from '@shared/utils/target-type.util';
 import { Spinner } from '@shared/ui/spinner/spinner';
 import { LegalContentModal } from '@shared/ui/legal-content-modal/legal-content-modal';
 import { CulqiCheckoutService } from '../../payment/culqi-checkout.service';
@@ -87,6 +88,12 @@ export class DonationStep3 {
     const id = this.state().targetId;
     if (!id) return 'Ninguno';
     return this.config()?.targets.find((t) => t.id === id)?.name ?? 'Ninguno';
+  }
+
+  getTargetLabel(): string {
+    const id = this.state().targetId;
+    const type = this.config()?.targets.find((t) => t.id === id)?.targetType;
+    return type ? getTargetTypeLabel(type) : 'Objetivo';
   }
 
   getDefaultGateway(): DonationGateway | null {
