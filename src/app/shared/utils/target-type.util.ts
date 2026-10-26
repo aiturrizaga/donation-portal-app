@@ -6,6 +6,7 @@ const TARGET_TYPE_LABELS: Record<string, string> = {
   group: 'Labor',
   campaign: 'Campaña',
   goal: 'Meta',
+  center: 'Centro',
 };
 
 export function getTargetTypeLabel(type: string): string {
