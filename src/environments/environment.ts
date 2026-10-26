@@ -1,7 +1,9 @@
+import { isDevMode } from '@angular/core';
+
 export const environment = {
-  production: true,
-  apiUrl: 'https://api.adeu.org.pe/api',
+  production: !isDevMode(),
+  apiUrl: import.meta.env.NG_APP_API_URL,
   support: {
-    url: 'mailto:donaciones@adeu.org.pe',
+    url: `mailto:${import.meta.env.NG_APP_SUPPORT_EMAIL}`,
   },
 };
