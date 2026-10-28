@@ -1,26 +1,35 @@
 <footer class="flex flex-col gap-0">
 
-  <!-- Datos de contacto del proveedor -->
-  <div class="flex flex-wrap gap-y-2 gap-x-6 px-6 py-4 border-t border-white/10">
-    <span class="flex items-center gap-2 text-xs text-white/55">
-      <i class="ti ti-map-pin text-sm text-white/35"></i>
-      {{ organizationAddress() }}
-    </span>
-    <a
-      [href]="'mailto:' + organizationEmail()"
-      class="flex items-center gap-2 text-xs text-white/55 hover:text-white/80 transition-colors"
-    >
-      <i class="ti ti-mail text-sm text-white/35"></i>
-      {{ organizationEmail() }}
-    </a>
-    <a
-      [href]="'tel:' + organizationPhone()"
-      class="flex items-center gap-2 text-xs text-white/55 hover:text-white/80 transition-colors"
-    >
-      <i class="ti ti-phone text-sm text-white/35"></i>
-      {{ organizationPhone() }}
-    </a>
-  </div>
+  <!-- Datos de contacto de la organización — cada dato se omite si no está
+       configurado en el admin, y la fila entera si no hay ninguno. -->
+  @if (organizationAddress() || organizationEmail() || organizationPhone()) {
+    <div class="flex flex-wrap gap-y-2 gap-x-6 px-6 py-4 border-t border-white/10">
+      @if (organizationAddress()) {
+        <span class="flex items-center gap-2 text-xs text-white/55">
+          <i class="ti ti-map-pin text-sm text-white/35"></i>
+          {{ organizationAddress() }}
+        </span>
+      }
+      @if (organizationEmail()) {
+        <a
+          [href]="'mailto:' + organizationEmail()"
+          class="flex items-center gap-2 text-xs text-white/55 hover:text-white/80 transition-colors"
+        >
+          <i class="ti ti-mail text-sm text-white/35"></i>
+          {{ organizationEmail() }}
+        </a>
+      }
+      @if (organizationPhone()) {
+        <a
+          [href]="'tel:' + organizationPhone()"
+          class="flex items-center gap-2 text-xs text-white/55 hover:text-white/80 transition-colors"
+        >
+          <i class="ti ti-phone text-sm text-white/35"></i>
+          {{ organizationPhone() }}
+        </a>
+      }
+    </div>
+  }
 
   <!-- Legal -->
   <div class="flex items-center justify-between flex-wrap gap-2.5 px-6 py-3 border-t border-white/10">

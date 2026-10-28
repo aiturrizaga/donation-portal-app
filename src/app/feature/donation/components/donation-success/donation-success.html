@@ -3,14 +3,14 @@
 @if (awaitingConfirmation()) {
   <!-- Recurring subscription's first charge is still awaiting webhook
        confirmation — see DonationStore.pollConfirmation. -->
-  <div class="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center">
-    <i class="ti ti-loader-2 text-3xl text-emerald-500 animate-spin"></i>
+  <div class="w-14 h-14 rounded-full bg-brand-100 flex items-center justify-center">
+    <i class="ti ti-loader-2 text-3xl text-brand-500 animate-spin"></i>
   </div>
   <div class="flex flex-col gap-1">
     <h2 class="text-xl font-bold text-gray-900">Confirmando tu donación...</h2>
     <p class="text-sm text-gray-500">
       Estamos verificando el cobro de
-      <span class="font-semibold text-emerald-600">
+      <span class="font-semibold text-brand-600">
         {{ getCurrencySymbol(result()?.currency ?? 'PEN') }} {{ result()?.amount }}
       </span>
       con tu banco. Esto toma solo unos segundos.
@@ -19,8 +19,8 @@
 } @else {
 
   <!-- Check icon -->
-  <div class="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center">
-    <i class="ti ti-circle-check text-3xl text-emerald-500"></i>
+  <div class="w-14 h-14 rounded-full bg-brand-100 flex items-center justify-center">
+    <i class="ti ti-circle-check text-3xl text-brand-500"></i>
   </div>
 
   <!-- Heading -->
@@ -30,7 +30,7 @@
     </h2>
     <p class="text-sm text-gray-500">
       Tu donación de
-      <span class="font-semibold text-emerald-600">
+      <span class="font-semibold text-brand-600">
         {{ getCurrencySymbol(result()?.currency ?? 'PEN') }} {{ result()?.amount }}
       </span>
       está confirmada.
@@ -45,7 +45,7 @@
         en cuanto se confirme tu pago.
       </p>
     } @else {
-      <p class="text-xs text-emerald-500 mt-1">
+      <p class="text-xs text-brand-500 mt-1">
         Tu certificado llegará a
         <span class="font-medium">{{ store.formState().email }}</span>
       </p>
@@ -82,7 +82,7 @@
       <button
         type="button"
         (click)="viewCertificate()"
-        class="w-full py-3 rounded-xl bg-emerald-500 text-white text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer"
+        class="w-full py-3 rounded-xl bg-brand-500 text-brand-contrast text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer"
       >
         <i class="ti ti-certificate text-base"></i>
         Ver mi certificado

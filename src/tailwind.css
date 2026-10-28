@@ -1,1 +1,25 @@
 @import 'tailwindcss';
+
+/*
+ * Paleta "brand" — sale de dos variables que BrandThemeService escribe en
+ * <html> a partir de branding.primaryColor de la página de donación (admin →
+ * Páginas → Branding). Los tonos claros/oscuros se derivan con color-mix, así
+ * que un solo color del admin alcanza para toda la escala. `inline` hace que
+ * las utilidades referencien var(--brand) directamente y reaccionen en vivo
+ * al cambio de la variable.
+ */
+@theme inline {
+  --color-brand-50: color-mix(in oklab, var(--brand) 10%, white);
+  --color-brand-100: color-mix(in oklab, var(--brand) 18%, white);
+  --color-brand-200: color-mix(in oklab, var(--brand) 32%, white);
+  --color-brand-500: var(--brand);
+  --color-brand-600: color-mix(in oklab, var(--brand) 85%, black);
+  --color-brand-700: color-mix(in oklab, var(--brand) 70%, black);
+  --color-brand-contrast: var(--brand-contrast);
+}
+
+/* Valores por defecto (emerald-500) mientras no haya branding cargado. */
+:root {
+  --brand: #10b981;
+  --brand-contrast: #ffffff;
+}

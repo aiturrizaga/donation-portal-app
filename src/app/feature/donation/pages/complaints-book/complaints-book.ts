@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { PortalSystemLayout } from '@core/layouts/portal-system-layout/portal-system-layout';
@@ -8,6 +15,9 @@ import { ComplaintSubmitResponse } from '../../models/complaint.model';
 import { ComplaintApi } from '../../api/complaint.api';
 import { getFieldError } from '@shared/utils/form-validation.util';
 import { TextField } from '@shared/ui/text-field/text-field';
+import { catchError, of } from 'rxjs';
+import { DonationApi } from '../../api/donation.api';
+import { BrandThemeService } from '@core/services/brand-theme.service';
 
 @Component({
   selector: 'app-complaints-book-page',
@@ -19,6 +29,19 @@ import { TextField } from '@shared/ui/text-field/text-field';
 export class ComplaintsBookPage {
   readonly #fb = inject(FormBuilder);
   readonly #api = inject(ComplaintApi);
+  readonly #brandTheme = inject(BrandThemeService);
+
+  // La reclamación la recibe la organización del dominio (el backend la
+  // resuelve por el header Portal-Request-Host, igual que POST /complaints) —
+  // su página por defecto trae el nombre y el branding de esa organización.
+  // Si no hay página configurada, el proveedor queda vacío en vez de fallar.
+  readonly #hostPage = toSignal(
+    inject(DonationApi)
+      .getDefaultPage()
+      .pipe(catchError(() => of(null))),
+    { initialValue: null },
+  );
+  readonly providerName = computed(() => this.#hostPage()?.organizationName ?? '');
 
   readonly documentTypes = DOCUMENT_TYPES;
   readonly today = new Date();
@@ -75,6 +98,13 @@ export class ComplaintsBookPage {
   });
 
   readonly showGuardian = computed(() => this.isMinorSignal());
+
+  constructor() {
+    effect(() => {
+      const page = this.#hostPage();
+      if (page) this.#brandTheme.applyIfUnset(page.branding?.primaryColor);
+    });
+  }
 
   selectRecordType(value: 'reclamo' | 'queja'): void {
     this.form.controls.recordType.setValue(value);

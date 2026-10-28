@@ -6,5 +6,5 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Spinner {
-  readonly variant = input<'primary' | 'white'>('primary');
+  readonly variant = input<'primary' | 'white' | 'contrast'>('primary');
 }

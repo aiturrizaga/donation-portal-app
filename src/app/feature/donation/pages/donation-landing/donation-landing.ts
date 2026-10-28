@@ -11,6 +11,7 @@ import { LegalPageApi } from '../../api/legal-page.api';
 import { PortalHeader } from '@shared/ui/portal-header/portal-header';
 import { PortalFooter } from '@shared/ui/portal-footer/portal-footer';
 import { normalizeRichText } from '@shared/utils/rich-text.util';
+import { BrandThemeService } from '@core/services/brand-theme.service';
 import { environment } from '@env/environment';
 
 @Component({
@@ -25,6 +26,7 @@ export class DonationLandingPage {
   readonly #document = inject(DOCUMENT);
   readonly #title = inject(Title);
   readonly #legalPageApi = inject(LegalPageApi);
+  readonly #brandTheme = inject(BrandThemeService);
   readonly store = inject(DonationStore);
 
   // Page comes already resolved and validated by the resolver
@@ -42,6 +44,11 @@ export class DonationLandingPage {
       if (page) this.store.init(page);
       if (page?.name) this.#title.setTitle(page.name);
     });
+
+    // Color primario del branding → paleta `brand-*` de todo el portal
+    // (formulario, botones, barra de progreso). Corre también en el SSR, así
+    // que el HTML ya llega con el color de la organización.
+    effect(() => this.#brandTheme.apply(this.primaryColor()));
 
     // Applied once per fresh load — there's no other route in this SPA that
     // would need a different favicon, and the <link> tag lives in <head>,
@@ -82,6 +89,8 @@ export class DonationLandingPage {
     if (hero) {
       return `background: linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.65) 100%), url('${hero}') center/cover no-repeat`;
     }
-    return 'background: linear-gradient(135deg, #0f1923 0%, #1a2a3a 50%, #0d2318 100%)';
+    // Sin imagen hero: degradado oscuro teñido con el color primario (antes
+    // el último tramo era un verde fijo, #0d2318).
+    return 'background: linear-gradient(135deg, #0f1923 0%, #1a2a3a 50%, color-mix(in oklab, var(--brand) 22%, #0b0f14) 100%)';
   });
 }
