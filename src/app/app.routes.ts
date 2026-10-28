@@ -10,6 +10,11 @@ export const routes: Routes = [
     loadComponent: () => import('./core/pages/not-configured').then((m) => m.NotConfiguredPage),
   },
   {
+    path: 'mi-cuenta',
+    loadComponent: () =>
+      import('./feature/account/pages/account-page/account-page').then((m) => m.AccountPage),
+  },
+  {
     path: '',
     loadChildren: () => import('./feature/donation/donation.routes').then((m) => m.routes),
   },
