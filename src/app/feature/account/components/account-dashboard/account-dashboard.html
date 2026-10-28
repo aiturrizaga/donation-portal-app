@@ -1,0 +1,187 @@
+<div class="flex flex-col gap-6 px-6 py-6 step-enter">
+  <!-- Encabezado -->
+  <div class="flex items-start justify-between gap-4">
+    <div class="min-w-0">
+      <div class="text-xs font-semibold text-brand-500 uppercase tracking-widest mb-0.5">
+        Mi cuenta
+      </div>
+      <h2 class="text-xl font-bold text-gray-900 truncate">{{ greeting() }}</h2>
+      <p class="text-sm text-gray-400 truncate">{{ account().primaryEmail }}</p>
+    </div>
+    <button
+      type="button"
+      class="shrink-0 flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 border border-gray-200 rounded-full px-3 py-1.5 cursor-pointer"
+      (click)="logout.emit()"
+    >
+      <i class="ti ti-logout text-base"></i>
+      Cerrar sesión
+    </button>
+  </div>
+
+  <!-- Suscripciones activas -->
+  @if (activeSubscriptions().length > 0) {
+    <section class="flex flex-col gap-3">
+      <h3 class="text-sm font-semibold text-gray-900">Donaciones recurrentes</h3>
+      <ul class="flex flex-col gap-2">
+        @for (sub of activeSubscriptions(); track sub.id) {
+          <li
+            class="flex items-center justify-between gap-3 border border-gray-100 rounded-xl px-4 py-3"
+          >
+            <div class="min-w-0">
+              <div class="text-sm font-semibold text-gray-900">
+                {{ getCurrencySymbol(sub.currency) }} {{ sub.amount | number: '1.2-2' }}
+                <span class="font-normal text-gray-500"
+                  >· {{ sub.frequencyLabel ?? 'Recurrente' }}</span
+                >
+              </div>
+              <div class="text-xs text-gray-400 truncate">
+                {{ sub.organization.name }}
+                @if (sub.targetName) {
+                  · {{ sub.targetName }}
+                }
+                @if (sub.nextChargeAt) {
+                  · Próximo cobro {{ sub.nextChargeAt | date: 'dd/MM/yyyy' }}
+                }
+              </div>
+            </div>
+            <span
+              class="text-[11px] font-semibold rounded-full px-2 py-0.5 shrink-0"
+              [class]="
+                sub.status === 'active'
+                  ? 'text-brand-700 bg-brand-50'
+                  : 'text-amber-700 bg-amber-50'
+              "
+            >
+              {{ subscriptionStatusLabels[sub.status] }}
+            </span>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+
+  <!-- Donaciones -->
+  <section class="flex flex-col gap-3">
+    <div class="flex items-baseline justify-between gap-2">
+      <h3 class="text-sm font-semibold text-gray-900">Mis donaciones</h3>
+      @if (donationsTotal() > 0) {
+        <span class="text-xs text-gray-400">{{ donationsTotal() }} en total</span>
+      }
+    </div>
+
+    @if (sortedOrganizations().length > 1) {
+      <div class="flex flex-wrap gap-2" role="group" aria-label="Filtrar por organización">
+        <button
+          type="button"
+          class="px-3 py-1.5 rounded-full border text-xs font-medium cursor-pointer transition-colors"
+          [class.border-brand-500]="selectedOrganizationId() === null"
+          [class.bg-brand-50]="selectedOrganizationId() === null"
+          [class.text-brand-700]="selectedOrganizationId() === null"
+          [class.border-gray-200]="selectedOrganizationId() !== null"
+          [class.text-gray-500]="selectedOrganizationId() !== null"
+          (click)="selectOrganization(null)"
+        >
+          Todas
+        </button>
+        @for (org of sortedOrganizations(); track org.id) {
+          <button
+            type="button"
+            class="px-3 py-1.5 rounded-full border text-xs font-medium cursor-pointer transition-colors"
+            [class.border-brand-500]="selectedOrganizationId() === org.id"
+            [class.bg-brand-50]="selectedOrganizationId() === org.id"
+            [class.text-brand-700]="selectedOrganizationId() === org.id"
+            [class.border-gray-200]="selectedOrganizationId() !== org.id"
+            [class.text-gray-500]="selectedOrganizationId() !== org.id"
+            (click)="selectOrganization(org.id)"
+          >
+            {{ org.name }}
+          </button>
+        }
+      </div>
+    }
+
+    @if (donationsError()) {
+      <app-inline-error message="No pudimos cargar tus donaciones." (retry)="retry()" />
+    } @else if (loadingDonations() && donations().length === 0) {
+      <div class="flex justify-center py-8"><app-spinner /></div>
+    } @else if (donations().length === 0) {
+      <div
+        class="flex flex-col items-center text-center gap-2 py-8 border border-dashed border-gray-200 rounded-xl"
+      >
+        <i class="ti ti-heart-handshake text-3xl text-gray-300"></i>
+        <p class="text-sm font-medium text-gray-700">Aún no tienes donaciones con estos correos</p>
+        <p class="text-xs text-gray-400 max-w-xs">
+          Si donaste con otro correo, agrégalo abajo para ver esas donaciones.
+        </p>
+      </div>
+    } @else {
+      <ul class="flex flex-col divide-y divide-gray-100 border border-gray-100 rounded-xl">
+        @for (donation of donations(); track donation.id) {
+          <li class="flex items-center justify-between gap-3 px-4 py-3">
+            <div class="min-w-0 flex flex-col gap-0.5">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-sm font-semibold text-gray-900">
+                  {{ getCurrencySymbol(donation.currency) }} {{ donation.amount | number: '1.2-2' }}
+                </span>
+                <span
+                  class="text-[11px] font-semibold rounded-full px-2 py-0.5"
+                  [class]="statusTone[donation.status]"
+                >
+                  {{ statusLabels[donation.status] }}
+                </span>
+                @if (donation.donationType === 'recurring') {
+                  <span class="text-[11px] text-gray-400">
+                    <i class="ti ti-repeat"></i> {{ donation.frequencyLabel ?? 'Recurrente' }}
+                  </span>
+                }
+              </div>
+              <span class="text-xs text-gray-500 truncate">
+                {{ donation.organization.name }}
+                @if (donation.targetName) {
+                  · {{ donation.targetName }}
+                }
+              </span>
+              <span class="text-[11px] text-gray-400 truncate">
+                {{ donation.createdAt | date: 'dd/MM/yyyy' }} · {{ donation.email }}
+              </span>
+            </div>
+            @if (donation.certificate) {
+              <button
+                type="button"
+                class="shrink-0 flex items-center gap-1.5 text-xs font-medium text-brand-600 border border-brand-200 hover:bg-brand-50 rounded-lg px-3 py-2 cursor-pointer disabled:opacity-60"
+                [disabled]="downloadingId() === donation.id"
+                [attr.aria-label]="
+                  'Descargar certificado ' + donation.certificate.certificateNumber
+                "
+                (click)="downloadCertificate(donation)"
+              >
+                @if (downloadingId() === donation.id) {
+                  <app-spinner />
+                } @else {
+                  <i class="ti ti-file-download text-base"></i>
+                }
+                <span class="hidden sm:inline">Certificado</span>
+              </button>
+            }
+          </li>
+        }
+      </ul>
+
+      @if (hasMore()) {
+        <button
+          type="button"
+          class="self-center flex items-center gap-2 text-sm font-medium text-brand-600 cursor-pointer hover:underline disabled:opacity-60"
+          [disabled]="loadingDonations()"
+          (click)="loadMore()"
+        >
+          @if (loadingDonations()) {
+            <app-spinner />
+          }
+          Ver más donaciones
+        </button>
+      }
+    }
+  </section>
+
+  <app-account-emails [account]="account()" (accountChange)="accountChange.emit($event)" />
+</div>

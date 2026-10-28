@@ -1,0 +1,162 @@
+<section class="flex flex-col gap-3">
+  <div>
+    <h3 class="text-sm font-semibold text-gray-900">Correos vinculados</h3>
+    <p class="text-xs text-gray-400">
+      Puedes ingresar con cualquiera de estos correos y verás todas sus donaciones.
+    </p>
+  </div>
+
+  <ul class="flex flex-col divide-y divide-gray-100 border border-gray-100 rounded-xl">
+    @for (item of account().emails; track item.email) {
+      <li class="flex items-center justify-between gap-3 px-4 py-3">
+        <div class="flex items-center gap-2 min-w-0">
+          <i class="ti ti-mail text-base text-gray-400 shrink-0"></i>
+          <span class="text-sm text-gray-700 truncate">{{ item.email }}</span>
+          @if (item.isPrimary) {
+            <span
+              class="text-[11px] font-semibold text-brand-700 bg-brand-50 rounded-full px-2 py-0.5 shrink-0"
+            >
+              Principal
+            </span>
+          }
+        </div>
+        @if (busyEmail() === item.email) {
+          <app-spinner />
+        } @else if (!item.isPrimary) {
+          <div class="flex items-center gap-3 shrink-0">
+            <button
+              type="button"
+              class="text-xs text-brand-600 hover:underline cursor-pointer"
+              (click)="setPrimary(item.email)"
+            >
+              Hacer principal
+            </button>
+            <button
+              type="button"
+              class="text-xs text-gray-400 hover:text-red-500 cursor-pointer"
+              [attr.aria-label]="'Quitar ' + item.email"
+              (click)="remove(item.email)"
+            >
+              <i class="ti ti-trash text-base"></i>
+            </button>
+          </div>
+        }
+      </li>
+    }
+  </ul>
+
+  @if (notice(); as msg) {
+    <div class="flex items-start gap-2 text-xs text-brand-700 bg-brand-50 rounded-lg px-3 py-2">
+      <i class="ti ti-circle-check text-base shrink-0"></i>
+      {{ msg }}
+    </div>
+  }
+
+  @switch (mode()) {
+    @case ('idle') {
+      <button
+        type="button"
+        class="self-start text-sm font-medium text-brand-600 flex items-center gap-1.5 cursor-pointer hover:underline"
+        (click)="startAdd()"
+      >
+        <i class="ti ti-plus text-base"></i>
+        ¿Donaste con otro correo? Agrégalo
+      </button>
+      @if (error(); as msg) {
+        <p class="text-xs text-red-500" role="alert">{{ msg }}</p>
+      }
+    }
+    @case ('email') {
+      <form
+        class="flex flex-col gap-3 border border-gray-100 rounded-xl p-4 step-enter"
+        [formGroup]="form"
+        (ngSubmit)="sendCode()"
+      >
+        <app-text-field
+          [control]="form.controls.email"
+          label="Otro correo"
+          type="email"
+          placeholder="otro@ejemplo.com"
+        />
+        <p class="text-xs text-gray-400">
+          Te enviaremos un código a ese correo para confirmar que es tuyo.
+        </p>
+        @if (error(); as msg) {
+          <p class="text-xs text-red-500" role="alert">{{ msg }}</p>
+        }
+        <div class="flex justify-end gap-2">
+          <button
+            type="button"
+            class="px-4 py-2 text-sm text-gray-500 cursor-pointer"
+            (click)="cancel()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="px-4 py-2 rounded-lg bg-brand-500 text-brand-contrast text-sm font-semibold flex items-center gap-2 cursor-pointer disabled:opacity-60"
+            [disabled]="busy()"
+          >
+            @if (busy()) {
+              <app-spinner variant="contrast" />
+            }
+            Enviar código
+          </button>
+        </div>
+      </form>
+    }
+    @case ('code') {
+      <div class="flex flex-col gap-3 border border-gray-100 rounded-xl p-4 step-enter">
+        <p class="text-sm text-gray-600">
+          Ingresa el código que enviamos a
+          <span class="font-medium">{{ maskEmail(pendingEmail()) }}</span
+          >.
+        </p>
+        <app-otp-input
+          [(value)]="code"
+          [disabled]="busy()"
+          [invalid]="!!error()"
+          (completed)="verify($event)"
+        />
+        @if (error(); as msg) {
+          <p class="text-xs text-red-500" role="alert">{{ msg }}</p>
+        }
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-xs text-gray-400">
+            @if (resendIn() > 0) {
+              Reenviar en {{ resendIn() }} s
+            } @else {
+              <button
+                type="button"
+                class="text-brand-600 underline cursor-pointer"
+                (click)="form.controls.email.setValue(pendingEmail()); sendCode()"
+              >
+                Reenviar código
+              </button>
+            }
+          </span>
+          <div class="flex gap-2">
+            <button
+              type="button"
+              class="px-4 py-2 text-sm text-gray-500 cursor-pointer"
+              (click)="cancel()"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              class="px-4 py-2 rounded-lg bg-brand-500 text-brand-contrast text-sm font-semibold flex items-center gap-2 cursor-pointer disabled:opacity-60"
+              [disabled]="code().length !== 6 || busy()"
+              (click)="verify()"
+            >
+              @if (busy()) {
+                <app-spinner variant="contrast" />
+              }
+              Vincular
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  }
+</section>
