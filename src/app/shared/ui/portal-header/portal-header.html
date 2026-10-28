@@ -1,16 +1,34 @@
-<header class="flex items-center justify-between px-6 py-4">
-  @if (logoUrl()) {
-    <img [src]="logoUrl()" alt="{{ organizationName() }}" class="h-8 object-contain" />
-  } @else {
-    <span class="text-white font-bold text-lg tracking-wide">
-      {{ organizationName() }}
-    </span>
-  }
+<header class="flex items-center justify-between gap-4 px-6 py-4">
+  <!-- El logo/nombre siempre lleva a la página de donación del dominio -->
   <a
-    routerLink="/mi-cuenta"
-    class="flex items-center gap-2 text-sm text-white/80 hover:text-white transition-colors border border-white/20 hover:border-white/40 rounded-full px-4 py-1.5"
+    routerLink="/"
+    class="min-w-0"
+    [attr.aria-label]="'Ir a la página de donación de ' + organizationName()"
   >
-    <i class="ti ti-user-circle text-base"></i>
-    Mi cuenta
+    @if (logoUrl()) {
+      <img [src]="logoUrl()" alt="{{ organizationName() }}" class="h-8 object-contain" />
+    } @else {
+      <span class="block text-white font-bold text-lg tracking-wide truncate">
+        {{ organizationName() }}
+      </span>
+    }
   </a>
+
+  @if (action() === 'donate') {
+    <a
+      routerLink="/"
+      class="shrink-0 flex items-center gap-2 text-sm text-white/80 hover:text-white transition-colors border border-white/20 hover:border-white/40 rounded-full px-4 py-1.5"
+    >
+      <i class="ti ti-arrow-left text-base"></i>
+      Volver a donar
+    </a>
+  } @else {
+    <a
+      routerLink="/mi-cuenta"
+      class="shrink-0 flex items-center gap-2 text-sm text-white/80 hover:text-white transition-colors border border-white/20 hover:border-white/40 rounded-full px-4 py-1.5"
+    >
+      <i class="ti ti-user-circle text-base"></i>
+      Mi cuenta
+    </a>
+  }
 </header>
