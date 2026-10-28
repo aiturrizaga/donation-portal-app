@@ -6,6 +6,12 @@ export interface DonationPage {
   suggestedAmounts: number[] | null;
   organizationName: string;
   organizationRuc: string;
+  // Datos de contacto de la organización dueña de la página (admin →
+  // Organizaciones) para el footer. Opcionales: si vienen vacíos el footer
+  // simplemente omite ese dato.
+  organizationAddress?: string | null;
+  organizationEmail?: string | null;
+  organizationPhone?: string | null;
   branding: PageBranding | null;
   formConfig: DonationFormConfig | null;
 }
