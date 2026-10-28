@@ -32,6 +32,8 @@ export class DonationStep1 {
 
   readonly allowNoneTarget = computed(() => this.config()?.allowNoneTarget ?? false);
 
+  readonly noneTargetAtStart = computed(() => (this.config()?.noneTargetPosition ?? 'end') === 'start');
+
   // Header label above the choices — the type of the objetivos shown, e.g.
   // "Causa" or "Labor". Targets assigned to a single page are normally all
   // the same type; when they aren't, falls back to a generic "Objetivo"

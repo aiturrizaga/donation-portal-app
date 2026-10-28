@@ -20,17 +20,20 @@
           [ngModel]="state().targetId ?? ''"
           (ngModelChange)="onTargetSelectChange($event)"
         >
-          @if (allowNoneTarget()) {
+          @if (allowNoneTarget() && noneTargetAtStart()) {
             <option value="">Ninguno</option>
           }
           @for (target of visibleTargets(); track target.id) {
             <option [value]="target.id" [disabled]="target.isLocked">{{ target.name }}</option>
           }
+          @if (allowNoneTarget() && !noneTargetAtStart()) {
+            <option value="">Ninguno</option>
+          }
         </select>
       } @else {
         <div class="flex flex-wrap gap-2">
 
-          @if (allowNoneTarget()) {
+          @if (allowNoneTarget() && noneTargetAtStart()) {
             <button
               type="button"
               class="px-3 py-1.5 rounded-full border text-xs font-medium transition-all cursor-pointer"
@@ -58,6 +61,21 @@
               (click)="selectTarget(target.id)"
             >
               {{ target.name }}
+            </button>
+          }
+
+          @if (allowNoneTarget() && !noneTargetAtStart()) {
+            <button
+              type="button"
+              class="px-3 py-1.5 rounded-full border text-xs font-medium transition-all cursor-pointer"
+              [class.border-emerald-500]="state().targetId === null"
+              [class.bg-emerald-50]="state().targetId === null"
+              [class.text-emerald-700]="state().targetId === null"
+              [class.border-gray-200]="state().targetId !== null"
+              [class.text-gray-500]="state().targetId !== null"
+              (click)="store.updateForm({ targetId: null })"
+            >
+              Ninguno
             </button>
           }
 

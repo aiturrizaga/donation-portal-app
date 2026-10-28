@@ -44,6 +44,9 @@ export interface DonationFormConfig {
   // sin texto de respaldo hardcodeado (ver DonationStep1.impactMessage).
   impactMessages: string[];
   allowNoneTarget: boolean;
+  // Dónde aparece la opción "Ninguno" entre las opciones de objetivo: al
+  // inicio o al final de la lista — configurado en el admin.
+  noneTargetPosition: 'start' | 'end';
   confirmHeading: string;
   confirmMessage: string | null;
   confirmQuoteText: string | null;
