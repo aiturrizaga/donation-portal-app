@@ -15,7 +15,10 @@ export class BrandThemeService {
   readonly #document = inject(DOCUMENT);
   readonly #renderer = inject(RendererFactory2).createRenderer(null, null);
 
+  #applied = false;
+
   apply(primaryColor: string | null | undefined): void {
+    this.#applied = true;
     const primary = normalizeHex(primaryColor) ?? DEFAULT_PRIMARY;
     const root = this.#document.documentElement;
     this.#renderer.setStyle(root, '--brand', primary, RendererStyleFlags2.DashCase);
@@ -25,6 +28,15 @@ export class BrandThemeService {
       contrastColor(primary),
       RendererStyleFlags2.DashCase,
     );
+  }
+
+  /**
+   * Para páginas sin branding propio (libro de reclamaciones): aplica el
+   * color solo si ninguna landing lo hizo antes en esta sesión — si el
+   * donante llegó desde /:slug, se respeta el color de esa página.
+   */
+  applyIfUnset(primaryColor: string | null | undefined): void {
+    if (!this.#applied) this.apply(primaryColor);
   }
 }
 
