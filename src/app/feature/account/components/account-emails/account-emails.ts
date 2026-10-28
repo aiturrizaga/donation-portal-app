@@ -153,7 +153,11 @@ export class AccountEmails {
         this.busyEmail.set(null);
         const apiError = toAccountApiError(err);
         this.error.set(
-          apiError.code === 'last_email' ? 'Tu cuenta debe tener al menos un correo.' : fallback,
+          apiError.code === 'last_email'
+            ? 'Tu cuenta debe tener al menos un correo.'
+            : apiError.code === 'email_not_linked'
+              ? otpErrorMessage(apiError)
+              : fallback,
         );
       },
     });

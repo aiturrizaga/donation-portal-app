@@ -112,20 +112,27 @@ export interface AccountApiError {
   retryAfterSeconds: number | null;
 }
 
-// El backend puede devolver el error plano ({ code, ... }) o envuelto en el
-// `detail` de FastAPI ({ detail: { code, ... } }) — se aceptan ambos.
+// Formato de error de /v1/portal/auth y /me (donation-manager-api):
+// { status: false, message, data: { code, detail: { code, attemptsLeft?,
+// retryAfterSeconds? } } }. También se aceptan `code`/`detail` en la raíz,
+// que es como responden otros endpoints de la API.
 export function toAccountApiError(err: unknown): AccountApiError {
   const http = err instanceof HttpErrorResponse ? err : null;
   const body = (http?.error ?? {}) as Record<string, any>;
-  const source = (
-    body['detail'] && typeof body['detail'] === 'object' ? body['detail'] : body
+  const root = (body['data'] && typeof body['data'] === 'object' ? body['data'] : body) as Record<
+    string,
+    any
+  >;
+  const detail = (
+    root['detail'] && typeof root['detail'] === 'object' ? root['detail'] : {}
   ) as Record<string, any>;
+  const pick = (key: string) => detail[key] ?? root[key];
   return {
     status: http?.status ?? 0,
-    code: source['code'] ?? source['reason'] ?? null,
-    attemptsLeft: typeof source['attemptsLeft'] === 'number' ? source['attemptsLeft'] : null,
+    code: pick('code') ?? null,
+    attemptsLeft: typeof pick('attemptsLeft') === 'number' ? pick('attemptsLeft') : null,
     retryAfterSeconds:
-      typeof source['retryAfterSeconds'] === 'number' ? source['retryAfterSeconds'] : null,
+      typeof pick('retryAfterSeconds') === 'number' ? pick('retryAfterSeconds') : null,
   };
 }
 
@@ -137,13 +144,19 @@ export function otpErrorMessage(error: AccountApiError): string {
         ? `Código incorrecto. Te quedan ${error.attemptsLeft} ${error.attemptsLeft === 1 ? 'intento' : 'intentos'}.`
         : 'Código incorrecto.';
     case 'otp_expired':
-      return 'El código venció. Solicita uno nuevo.';
+      return 'El código ya no es válido. Solicita uno nuevo.';
     case 'otp_locked':
       return 'Superaste el número de intentos. Solicita un código nuevo.';
-    case 'otp_rate_limited':
-      return 'Solicitaste demasiados códigos. Espera unos minutos e inténtalo de nuevo.';
+    case 'rate_limited':
+      return error.retryAfterSeconds
+        ? `Espera ${error.retryAfterSeconds} s antes de pedir otro código.`
+        : 'Solicitaste demasiados códigos. Espera unos minutos e inténtalo de nuevo.';
     case 'email_already_linked':
       return 'Ese correo ya está vinculado a tu cuenta.';
+    case 'too_many_emails':
+      return 'Alcanzaste el máximo de 10 correos vinculados.';
+    case 'email_not_linked':
+      return 'Ese correo ya no está vinculado a tu cuenta.';
   }
   if (error.status === 429) {
     return 'Solicitaste demasiados códigos. Espera unos minutos e inténtalo de nuevo.';
