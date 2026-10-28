@@ -13,7 +13,7 @@
     @if (submitted(); as result) {
       <!-- Confirmación de envío -->
       <div class="flex flex-col items-center text-center gap-3 py-10">
-        <i class="ti ti-circle-check text-5xl text-emerald-500"></i>
+        <i class="ti ti-circle-check text-5xl text-brand-500"></i>
         <h2 class="text-base font-medium text-zinc-800">Reclamación registrada</h2>
         <p class="text-sm text-zinc-500 max-w-sm">
           Tu reclamación quedó registrada con el número de hoja
@@ -37,7 +37,7 @@
     <form [formGroup]="form" class="flex flex-col">
 
       <!-- 1. Datos del consumidor -->
-      <div class="text-xs font-medium tracking-wide text-emerald-600 uppercase mb-2.5">
+      <div class="text-xs font-medium tracking-wide text-brand-600 uppercase mb-2.5">
         1. Tus datos
       </div>
 
@@ -54,7 +54,7 @@
             <label class="text-xs text-zinc-600">Tipo doc.</label>
             <select
               formControlName="documentType"
-              class="border border-zinc-200 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:border-emerald-500"
+              class="border border-zinc-200 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-500"
             >
               @for (dt of documentTypes; track dt.value) {
                 <option [value]="dt.value">{{ dt.label }}</option>
@@ -98,7 +98,7 @@
 
         <!-- Menor de edad -->
         <label class="flex items-center gap-2 cursor-pointer mt-0.5">
-          <input type="checkbox" formControlName="isMinor" class="w-4 h-4 accent-emerald-500" />
+          <input type="checkbox" formControlName="isMinor" class="w-4 h-4 accent-brand-500" />
           <span class="text-xs text-zinc-600">El consumidor es menor de edad</span>
         </label>
 
@@ -113,7 +113,7 @@
       </div>
 
       <!-- 2. Detalle -->
-      <div class="text-xs font-medium tracking-wide text-emerald-600 uppercase mt-5 mb-2.5">
+      <div class="text-xs font-medium tracking-wide text-brand-600 uppercase mt-5 mb-2.5">
         2. Detalle
       </div>
 
@@ -123,24 +123,24 @@
           type="button"
           (click)="selectRecordType('reclamo')"
           class="flex-1 rounded-lg p-2.5 text-left transition-all cursor-pointer border"
-          [class.border-emerald-500]="isReclamo()"
-          [class.bg-emerald-50]="isReclamo()"
+          [class.border-brand-500]="isReclamo()"
+          [class.bg-brand-50]="isReclamo()"
           [class.border-zinc-200]="!isReclamo()"
         >
           <div class="flex items-center gap-1.5 mb-0.5">
             <i
               class="ti text-base"
               [class.ti-circle-check]="isReclamo()"
-              [class.text-emerald-700]="isReclamo()"
+              [class.text-brand-700]="isReclamo()"
               [class.ti-circle]="!isReclamo()"
               [class.text-zinc-400]="!isReclamo()"
             ></i>
-            <span class="text-sm font-medium" [class.text-emerald-700]="isReclamo()"
+            <span class="text-sm font-medium" [class.text-brand-700]="isReclamo()"
                   [class.text-zinc-600]="!isReclamo()">
               Reclamo
             </span>
           </div>
-          <span class="text-[11px]" [class.text-emerald-600]="isReclamo()" [class.text-zinc-400]="!isReclamo()">
+          <span class="text-[11px]" [class.text-brand-600]="isReclamo()" [class.text-zinc-400]="!isReclamo()">
             Disconformidad con el servicio
           </span>
         </button>
@@ -149,24 +149,24 @@
           type="button"
           (click)="selectRecordType('queja')"
           class="flex-1 rounded-lg p-2.5 text-left transition-all cursor-pointer border"
-          [class.border-emerald-500]="!isReclamo()"
-          [class.bg-emerald-50]="!isReclamo()"
+          [class.border-brand-500]="!isReclamo()"
+          [class.bg-brand-50]="!isReclamo()"
           [class.border-zinc-200]="isReclamo()"
         >
           <div class="flex items-center gap-1.5 mb-0.5">
             <i
               class="ti text-base"
               [class.ti-circle-check]="!isReclamo()"
-              [class.text-emerald-700]="!isReclamo()"
+              [class.text-brand-700]="!isReclamo()"
               [class.ti-circle]="isReclamo()"
               [class.text-zinc-400]="isReclamo()"
             ></i>
-            <span class="text-sm font-medium" [class.text-emerald-700]="!isReclamo()"
+            <span class="text-sm font-medium" [class.text-brand-700]="!isReclamo()"
                   [class.text-zinc-600]="isReclamo()">
               Queja
             </span>
           </div>
-          <span class="text-[11px]" [class.text-emerald-600]="!isReclamo()" [class.text-zinc-400]="isReclamo()">
+          <span class="text-[11px]" [class.text-brand-600]="!isReclamo()" [class.text-zinc-400]="isReclamo()">
             Malestar con la atención
           </span>
         </button>
@@ -177,7 +177,7 @@
           <label class="text-xs text-zinc-600">Tipo</label>
           <select
             formControlName="goodType"
-            class="border border-zinc-200 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:border-emerald-500"
+            class="border border-zinc-200 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:border-brand-500"
           >
             <option value="servicio">Servicio</option>
             <option value="producto">Producto</option>
@@ -189,7 +189,7 @@
             type="number"
             formControlName="amount"
             placeholder="S/ 0.00"
-            class="border border-zinc-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500"
+            class="border border-zinc-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-brand-500"
           />
         </div>
       </div>
@@ -218,7 +218,7 @@
 
       <!-- Consentimiento -->
       <label class="flex items-start gap-2 mb-3.5 cursor-pointer">
-        <input type="checkbox" formControlName="dataConsent" class="mt-0.5 w-4 h-4 accent-emerald-500 shrink-0" />
+        <input type="checkbox" formControlName="dataConsent" class="mt-0.5 w-4 h-4 accent-brand-500 shrink-0" />
         <span class="text-[11px] text-zinc-500 leading-relaxed">
           He leído y acepto el tratamiento de mis datos personales para la atención de este reclamo
           (Ley 29733).
