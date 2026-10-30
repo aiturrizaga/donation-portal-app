@@ -60,6 +60,9 @@ export class AccountPage {
   protected readonly restoring = signal(this.#session.isLoggedIn());
 
   protected readonly orgName = computed(() => this.hostPage()?.organizationName ?? '');
+  protected readonly headerTitle = computed(
+    () => this.hostPage()?.branding?.companyName?.trim() || this.orgName(),
+  );
   protected readonly logoUrl = computed(() => {
     const path = this.hostPage()?.branding?.logoUrl;
     return path ? `${environment.apiUrl}${path}` : null;

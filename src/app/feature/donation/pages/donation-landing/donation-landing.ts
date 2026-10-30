@@ -83,6 +83,10 @@ export class DonationLandingPage {
   readonly heroHeading = computed(() => normalizeRichText(this.branding()?.heroHeading));
   readonly welcomeText = computed(() => normalizeRichText(this.branding()?.welcomeText));
   readonly orgName = computed(() => this.store.page()?.organizationName ?? '');
+  // "Título de encabezado" del branding (admin → Páginas → Branding); si está
+  // vacío, el nombre de la organización. El footer sigue usando el nombre
+  // legal de la organización (va junto al RUC).
+  readonly headerTitle = computed(() => this.branding()?.companyName?.trim() || this.orgName());
 
   readonly backgroundStyle = computed(() => {
     const hero = this.heroImageUrl();
