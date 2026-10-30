@@ -6,7 +6,7 @@
   <!-- Header -->
   @if (store.page()) {
     <app-portal-header
-      [organizationName]="orgName()"
+      [organizationName]="headerTitle()"
       [logoUrl]="logoUrl()"
     />
   } @else {
