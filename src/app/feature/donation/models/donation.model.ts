@@ -13,7 +13,17 @@ export interface DonationPage {
   organizationEmail?: string | null;
   organizationPhone?: string | null;
   branding: PageBranding | null;
+  // SEO / vista previa al compartir (admin → Páginas → SEO). Todo opcional:
+  // ver DonationLandingPage.seo para los respaldos.
+  seo: PageSeo | null;
   formConfig: DonationFormConfig | null;
+}
+
+export interface PageSeo {
+  metaTitle: string | null;
+  metaDescription: string | null;
+  ogImageUrl: string | null;
+  noIndex: boolean;
 }
 
 export interface PageBranding {

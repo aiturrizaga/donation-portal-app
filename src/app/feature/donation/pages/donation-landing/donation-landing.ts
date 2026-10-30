@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import { Title } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
@@ -10,8 +9,9 @@ import { DonationPage } from '../../models/donation.model';
 import { LegalPageApi } from '../../api/legal-page.api';
 import { PortalHeader } from '@shared/ui/portal-header/portal-header';
 import { PortalFooter } from '@shared/ui/portal-footer/portal-footer';
-import { normalizeRichText } from '@shared/utils/rich-text.util';
+import { normalizeRichText, richTextToPlain } from '@shared/utils/rich-text.util';
 import { BrandThemeService } from '@core/services/brand-theme.service';
+import { SeoService } from '@core/services/seo.service';
 import { environment } from '@env/environment';
 
 @Component({
@@ -24,7 +24,7 @@ import { environment } from '@env/environment';
 export class DonationLandingPage {
   readonly #route = inject(ActivatedRoute);
   readonly #document = inject(DOCUMENT);
-  readonly #title = inject(Title);
+  readonly #seo = inject(SeoService);
   readonly #legalPageApi = inject(LegalPageApi);
   readonly #brandTheme = inject(BrandThemeService);
   readonly store = inject(DonationStore);
@@ -42,7 +42,13 @@ export class DonationLandingPage {
     effect(() => {
       const page = this.#page();
       if (page) this.store.init(page);
-      if (page?.name) this.#title.setTitle(page.name);
+    });
+
+    // Título + metatags (Google y vista previa al compartir). Corre en el
+    // SSR, que es lo único que leen los bots de Facebook/WhatsApp/X.
+    effect(() => {
+      const page = this.#page();
+      if (page) this.#seo.apply(this.#seoData(page));
     });
 
     // Color primario del branding → paleta `brand-*` de todo el portal
@@ -87,6 +93,25 @@ export class DonationLandingPage {
   // vacío, el nombre de la organización. El footer sigue usando el nombre
   // legal de la organización (va junto al RUC).
   readonly headerTitle = computed(() => this.branding()?.companyName?.trim() || this.orgName());
+
+  // Respaldos cuando el admin no completó la pestaña SEO: nombre de la página,
+  // texto de bienvenida e imagen hero → logo.
+  #seoData(page: DonationPage) {
+    const seo = page.seo;
+    const branding = page.branding;
+    const siteName = branding?.companyName?.trim() || page.organizationName;
+    const imagePath = seo?.ogImageUrl ?? branding?.heroImageUrl ?? branding?.logoUrl ?? null;
+    return {
+      title: seo?.metaTitle?.trim() || page.name,
+      description:
+        seo?.metaDescription?.trim() ||
+        richTextToPlain(branding?.welcomeText) ||
+        `Dona a ${page.organizationName} de forma segura.`,
+      imageUrl: imagePath ? `${environment.apiUrl}${imagePath}` : null,
+      siteName,
+      noIndex: seo?.noIndex ?? false,
+    };
+  }
 
   readonly backgroundStyle = computed(() => {
     const hero = this.heroImageUrl();

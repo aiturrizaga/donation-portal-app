@@ -24,3 +24,21 @@ export function normalizeRichText(html: string | null | undefined): string | nul
     .replace(/&#xa0;/gi, ' ')
     .split(rawNbsp).join(' ');
 }
+
+/** Texto plano a partir del HTML del editor — para metatags (description). */
+export function richTextToPlain(html: string | null | undefined, maxLength = 160): string {
+  const normalized = normalizeRichText(html);
+  if (!normalized) return '';
+  const text = normalized
+    .replace(/<\/(p|div|h\d|li)>/gi, ' ')
+    .replace(/<br\s*\/?>/gi, ' ')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, ' ')
+    .trim();
+  return text.length > maxLength ? `${text.slice(0, maxLength - 1).trimEnd()}…` : text;
+}
